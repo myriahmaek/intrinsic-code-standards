@@ -1,0 +1,92 @@
+{
+  "policy_version": "v0.1.0",
+  "baseline_forbidden_claims": [
+    "certified by",
+    "certified to",
+    "is certified",
+    "compliant with",
+    "fully compliant",
+    "approved by",
+    "authorized under",
+    "authorized by",
+    "endorsed by",
+    "officially endorsed",
+    "blessed by",
+    "OWASP-approved",
+    "OWASP approved",
+    "NIST-approved",
+    "NIST approved",
+    "PCI-certified",
+    "PCI certified",
+    "PCI compliant",
+    "HIPAA compliant",
+    "HIPAA certified",
+    "FedRAMP authorized",
+    "FedRAMP-approved",
+    "ISO certified",
+    "vulnerability-free",
+    "audit-proof",
+    "zero vulnerabilities",
+    "zero defects",
+    "perfectly secure"
+  ],
+  "baseline_forbidden_patterns": [
+    "\\b\\w+-approved\\b",
+    "\\b\\w+-certified\\b",
+    "\\bapproved by \\w+\\b",
+    "\\bcertified (by|to) \\w+\\b",
+    "\\bendorsed by \\w+\\b",
+    "\\bauthorized (by|under) \\w+\\b"
+  ],
+  "baseline_softened_claims": [
+    "addresses",
+    "aligned with",
+    "mapped to",
+    "evaluated against",
+    "supports evidence for",
+    "implements controls described by",
+    "demonstrates coverage of",
+    "references"
+  ],
+  "test_cases": [
+    {
+      "pattern": "\\b\\w+-approved\\b",
+      "must_match": ["OWASP-approved", "NIST-approved", "FedRAMP-approved"],
+      "must_not_match": ["pre-approved by code review", "preapproved internally", "approved language"]
+    },
+    {
+      "pattern": "\\b\\w+-certified\\b",
+      "must_match": ["PCI-certified", "ISO-certified"],
+      "must_not_match": ["self-certified internal review", "certified mail"]
+    },
+    {
+      "pattern": "\\bapproved by \\w+\\b",
+      "must_match": ["approved by OWASP", "approved by NIST"],
+      "must_not_match": ["approved", "approved language"]
+    },
+    {
+      "pattern": "\\bcertified (by|to) \\w+\\b",
+      "must_match": ["certified by ISO", "certified to PCI-DSS"],
+      "must_not_match": ["certified", "certified statement"]
+    },
+    {
+      "pattern": "\\bendorsed by \\w+\\b",
+      "must_match": ["endorsed by OWASP", "endorsed by NIST"],
+      "must_not_match": ["endorsement letter", "endorsed"]
+    },
+    {
+      "pattern": "\\bauthorized (by|under) \\w+\\b",
+      "must_match": ["authorized under FedRAMP", "authorized by HHS"],
+      "must_not_match": ["authorized signatory", "authorized"]
+    }
+  ],
+  "enforcement_scope": [
+    "auditor_summary",
+    "verdict_reasoning",
+    "finding.description",
+    "finding.attack_scenario",
+    "bundle_audit_review.*",
+    "external_standards_review.*"
+  ],
+  "policy_notes": "Python aggregator enforces deterministically via string match (baseline_forbidden_claims) AND regex match (baseline_forbidden_patterns) on every text field listed in enforcement_scope. Model-internal thinking and logs are exempt. Per-requirement forbidden_claims are union'd with these baselines at enforcement time. Models may flag advisory concerns; only Python blocks signing. Corpus loader runs every entry in test_cases at load time; mismatch fails load."
+}

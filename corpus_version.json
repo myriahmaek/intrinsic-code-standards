@@ -1,0 +1,34 @@
+{
+  "corpus_version": "v0.1.0",
+  "corpus_version_date": "2026-05-19",
+  "blueprint_schema_version": "1.0",
+  "blueprint_schema_path": "orchestrator/schemas/blueprint.schema.json",
+  "standards": {
+    "MASVS": {
+      "status": "not_transcribed",
+      "current_version": null,
+      "verified_at": null,
+      "reason": "Pending Round 1 corpus authoring"
+    },
+    "NIST-800-63": {
+      "status": "not_transcribed",
+      "current_version": null,
+      "verified_at": null,
+      "reason": "Pending Round 1 corpus authoring; founder must verify current published revision"
+    },
+    "PCI-DSS": {
+      "status": "not_transcribed",
+      "current_version": null,
+      "verified_at": null,
+      "reason": "Tier 4 dependency"
+    },
+    "HIPAA": {
+      "status": "not_transcribed",
+      "current_version": null,
+      "verified_at": null,
+      "reason": "Tier 4 dependency"
+    }
+  },
+  "review_cadence_days": 90,
+  "next_review_due": "2026-08-17"
+}
