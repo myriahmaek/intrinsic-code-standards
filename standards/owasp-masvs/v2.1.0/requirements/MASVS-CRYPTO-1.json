@@ -32,7 +32,7 @@
   "source_integrity": {
     "source_artifact_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
     "transcription_input_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
-    "requirement_file_sha256": "7b35103870e662c11f9056abca3d2c8f2a13ba5211cc00b6a9725df1bc45c58d"
+    "requirement_file_sha256": "74e311cd73b179cd7fe3a9ea9bae283fdc73f26a4a7af34a184dee21f3070141"
   },
 
   "applicability": {
@@ -114,7 +114,7 @@
   },
 
   "intrinsic_mapping": {
-    "constitution_versions": ["0.4"],
+    "constitution_versions": ["0.5"],
     "constitutional_trace_ids": [
       "SEC-PILLAR-3-CRYPTO-PRIMITIVES",
       "SEC-PILLAR-3-FORBIDDEN-PRIMITIVES"

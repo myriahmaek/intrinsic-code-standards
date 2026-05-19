@@ -30,11 +30,11 @@
   "source_integrity": {
     "source_artifact_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
     "transcription_input_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
-    "requirement_file_sha256": "46cbba08b8e15abd4f55dc1c0b3ceaac1c7e084b91031aaf18a38e3f51a596f8"
+    "requirement_file_sha256": "031dab81d9d71443e6756d5813b473f4c16d870c452621ed01596fae40a75ce9"
   },
 
   "applicability": {
-    "tier_floor": 3,
+    "tier_floor": 2,
     "conditions_logic": "all",
     "conditions": [
       {
@@ -43,7 +43,7 @@
         "value": 3
       }
     ],
-    "human_note": "Applies to every Tier 3+ app. Effective tier_floor for this MASVS control is 3 per the authoritative SEC-PILLAR-2-KEYBOARD-CACHE mapping in v1.1. Apps at Tier 1-2 with sensitive data still SHOULD address STORAGE-2's broader leakage surface (logs, backups, screenshots, IPC) as defense-in-depth, but the v1.1 corpus does not enforce STORAGE-2 below Tier 3 because no authoritative trace mapping fires there. APPLICABILITY TODO: Sequoia v2.6 raises data-sensitivity questions conversationally during blueprinting but the blueprint schema does not yet land a structured `handles_sensitive_data` boolean or `sensitive_data_classes[]` array that corpus conditions can mechanically check. When that field lands (blueprint schema patch + Scribe extraction + PIPELINE_LANGUAGE §2.5 update), this applicability should migrate to use it directly — that would extend STORAGE-2 coverage below Tier 3 honestly. Also TODO: mapping file v1.2 may add additional Constitution traces (e.g., screen protection, logging discipline, backup configuration) as authoritatively mapped to STORAGE-2; until then, this MASVS control is covered by Pillar 2 keyboard-cache plus file_standards_auditor / reaper-mobile / reaper-privacy auditor judgment on the broader vectors."
+    "human_note": "Applies to every Tier 3+ app. Per mapping file v1.2, MASVS-STORAGE-2 is authoritatively mapped to two Constitution v0.5 traces: SEC-PILLAR-2-SENSITIVE-DATA-LEAKAGE-PREVENTION (primary, covering the full preventable-leakage surface — backups, logs, crash reports, analytics, clipboard, screenshots, IPC payloads, exported files) and SEC-PILLAR-2-KEYBOARD-CACHE (supporting, covering the specific keyboard-cache vector at Tier 3+). Tier_floor is 2, matching the primary trace's applicable tier range. APPLICABILITY TODO: Sequoia v2.6 raises data-sensitivity questions conversationally during blueprinting but the blueprint schema does not yet land a structured `handles_sensitive_data` boolean or `sensitive_data_classes[]` array that corpus conditions can mechanically check. When that field lands (blueprint schema patch + Scribe extraction + PIPELINE_LANGUAGE §2.5 update), this applicability should migrate to use it directly — that would extend STORAGE-2 coverage below Tier 3 honestly."
   },
 
   "intrinsic_interpretation": {
@@ -117,8 +117,9 @@
   },
 
   "intrinsic_mapping": {
-    "constitution_versions": ["0.4"],
+    "constitution_versions": ["0.5"],
     "constitutional_trace_ids": [
+      "SEC-PILLAR-2-SENSITIVE-DATA-LEAKAGE-PREVENTION",
       "SEC-PILLAR-2-KEYBOARD-CACHE"
     ],
     "receipt_fields": [
