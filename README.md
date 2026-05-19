@@ -1,10 +1,24 @@
-# Intrinsic Code Standards Corpus — Schema Spec v0.1.3 rev4
+# Intrinsic Code Standards Corpus — Schema Spec v0.1.4
 
-**Status:** rev4 integrated. Locked candidate. For founder ratification.
+**Status:** v0.1.4 patch integrated. Locked candidate. For founder ratification.
 **Author:** Claude Opus 4.7
 **Founder:** Myriah Knittle
 **Repo:** `intrinsic-code-standards` (public, submoduled into `intrinsic-code` main repo)
-**Supersedes:** rev3 at v0.1.2 + v0.1.3 patch (merged into this doc)
+**Supersedes:** v0.1.3 rev4 (v0.1.4 patch — Constitution trace ID validation — integrated into this doc)
+
+---
+
+## Changelog v0.1.3 → v0.1.4
+
+Additive patch on the v0.1.3 rev4 base. No existing field shape modified.
+
+### Additions in v0.1.4
+
+1. **LOAD-15 Constitution trace ID validation** (§9). Catches `intrinsic_mapping.constitutional_trace_ids[]` entries that don't resolve to a real `trace_id` in the authoritative `mappings/constitution_to_external_standards.json` mapping file. Mirrors LOAD-4 (auditor consumer validation) — same failure mode, same fix.
+2. **`constitution_mapping_file_locator` block** added to `corpus_version.json` (§7). Tells the corpus loader where to find the mapping file relative to the main factory repo; documents the external-auditor access path when the main repo isn't accessible.
+3. **Soft-fail mode for LOAD-15** when the mapping file isn't reachable (external-auditor context without main repo access). Honest disclosure rather than silent degradation; loader emits `mapping_file_unavailable_for_load_15_check` warning.
+
+Precedent: MASVS-STORAGE-1 transcription drift (May 19, 2026) — chat-side Claude drafted `SEC-PILLAR-5-SECURE-STORAGE` from intuition; real trace is `SEC-PILLAR-3-SECURE-STORAGE`. GPT cross-check caught it. LOAD-15 is the structural backstop.
 
 ---
 
@@ -505,6 +519,13 @@ Root-level file tracking the whole corpus state.
   "corpus_version_date": "2026-05-19",
   "blueprint_schema_version": "1.0",
   "blueprint_schema_path": "orchestrator/schemas/blueprint.schema.json",
+  "constitution_mapping_file_locator": {
+    "path_in_main_repo": "mappings/constitution_to_external_standards.json",
+    "expected_mapping_file_version": "1.1",
+    "expected_constitution_version": "0.4",
+    "main_repo_visibility": "private",
+    "external_auditor_access_note": "Mapping file lives in the private factory repo. External auditors verifying a Receipt may request the mapping file at the corpus commit hash from the founder via support@beforrealmedia.com; verify against the corpus version's expected_mapping_file_version field."
+  },
   "standards": {
     "MASVS": {
       "status": "not_transcribed",
@@ -606,7 +627,13 @@ At every corpus load (factory init OR external auditor verification), the loader
 - If `certification_disclaimer_present: true`, then `certification_disclaimer` and `certification_disclaimer_source_section` MUST be non-null. Missing → fail with `missing_certification_disclaimer`.
 - If `standards_body_certification_available: false`, then no active requirement under this standard may have `standards_body_endorsement.endorsed: true`. Violation → fail with `certification_unavailable_but_endorsement_claimed` citing the offending requirement.
 
-The loader stops at the first failure (LOAD-1 through LOAD-10, LOAD-13, LOAD-14) and emits the full set of failing rules + offending IDs. LOAD-11 runs all test cases before failing (so founder sees the full set of broken patterns). LOAD-12 is non-failing — produces flag report consumed at quarterly review.
+**LOAD-15: Constitution trace ID validation.** For every requirement file, every entry in `intrinsic_mapping.constitutional_trace_ids[]` MUST resolve to a `trace_id` value in the authoritative Constitution-to-external-standards mapping file (`mappings/constitution_to_external_standards.json` at the version specified in `intrinsic_mapping.constitution_versions[]` and located via `corpus_version.json.constitution_mapping_file_locator.path_in_main_repo`).
+
+Unknown trace ID → fail with `unknown_constitutional_trace_id` citing the offending trace ID, the requirement file, and the resolved mapping file path. Declared constitution version with no available mapping file → fail with `mapping_file_version_unavailable`.
+
+**LOAD-15 soft-fail mode:** when the loader runs in external-auditor context without main-repo access (mapping file unreachable), LOAD-15 emits a warning (`mapping_file_unavailable_for_load_15_check`) rather than a hard failure. Honest disclosure rather than silent degradation; external auditors then know to request the mapping file from the founder at the corpus commit hash to complete their audit.
+
+The loader stops at the first failure (LOAD-1 through LOAD-10, LOAD-13, LOAD-14, LOAD-15 in factory mode) and emits the full set of failing rules + offending IDs. LOAD-11 runs all test cases before failing (so founder sees the full set of broken patterns). LOAD-12 is non-failing — produces flag report consumed at quarterly review. LOAD-15 in soft-fail mode is also non-failing.
 
 ---
 
@@ -702,6 +729,9 @@ Corpus is append-only at commit level. Errata = version forward, never edit back
 | Planned auditor never ships | LOAD-12 flags referencing requirements for quarterly review |
 | Restricted normative text accidentally pasted into public requirement | LOAD-13 load failure |
 | Standard-wide forbidden claims missed by per-requirement files | Manifest inheritance applies standard baseline to all requirements automatically |
+| Requirement references nonexistent Constitution trace ID | LOAD-15 corpus load failure (factory mode); soft-fail warning (external auditor mode without mapping file access) |
+| Constitution mapping file version mismatch with corpus `constitution_versions` declaration | LOAD-15 corpus load failure with `mapping_file_version_unavailable` |
+| External auditor cannot resolve trace IDs without main-repo mapping file | LOAD-15 soft-fail mode emits explicit warning; corpus loader documents the gap; auditor requests mapping file from founder |
 
 ---
 
@@ -724,4 +754,4 @@ This is the moat.
 
 ---
 
-*v0.1.3 rev4 integrated — Locked candidate. Awaiting founder ratification. Once locked at v0.1.3, transcription work begins.*
+*v0.1.4 — additive Constitution trace ID validation. Lock candidate. Awaiting founder ratification.*
