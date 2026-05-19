@@ -30,7 +30,7 @@
   "source_integrity": {
     "source_artifact_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
     "transcription_input_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
-    "requirement_file_sha256": "031dab81d9d71443e6756d5813b473f4c16d870c452621ed01596fae40a75ce9"
+    "requirement_file_sha256": "7ef54b445ecdf24cb67f4fa9c8d269101f58a7e8f520f60ac51dc339ad0ac1ef"
   },
 
   "applicability": {
@@ -49,7 +49,7 @@
   "intrinsic_interpretation": {
     "interpretation_version": "1.0",
     "mapping_strength": "partial",
-    "mapping_rationale": "Mapping file v1.1 authoritatively maps SEC-PILLAR-2-KEYBOARD-CACHE to MASVS-STORAGE-2 with the canonical rationale: 'MASVS-STORAGE-2 requires that sensitive data not be leaked through unintended storage mechanisms. Keyboard caches are a documented unintended storage vector for credentials and PII; disabling them on sensitive fields directly addresses this requirement.' The mapping is partial because MASVS-STORAGE-2's leakage surface is broad — beyond keyboard caches, it covers backups, logs, screenshots, clipboard, crash reports, analytics SDK exfiltration, and IPC mechanisms. The keyboard-cache trace directly covers one important vector; the other vectors are evaluated by file_standards_auditor (per-file scanning for logged-sensitive-data and improper backup config) and the Reaper specialists reaper-mobile (mobile platform attack surface) and reaper-privacy (PII handling correctness). Mapping file v1.2 may add additional Constitution traces (e.g., backup-exclusion configuration, screen protection scoped to STORAGE-2's leakage frame) as authoritatively mapped to STORAGE-2; until then, this corpus relies on the keyboard-cache trace plus auditor judgment for the long tail.",
+    "mapping_rationale": "Mapping file v1.2 authoritatively maps two Constitution v0.5 traces to MASVS-STORAGE-2: SEC-PILLAR-2-SENSITIVE-DATA-LEAKAGE-PREVENTION as the primary trace covering the full preventable-leakage surface (backups, logs, crash reports, analytics SDK payloads, system clipboard, app-switcher screenshots, IPC payloads, exported files), and SEC-PILLAR-2-KEYBOARD-CACHE as the supporting trace covering the keyboard-cache vector at Tier 3+. Together these traces address MASVS-STORAGE-2's full scope at the design layer; auditor judgment supplements where vector-specific implementation evidence is required.",
     "verification_guidance": {
       "evidence_locator_types": [
         "symbol_pattern",
@@ -113,7 +113,7 @@
     ],
     "forbidden_claims": [],
     "requires_external_certification": false,
-    "claim_boundary_notes": "Standard-level baseline (from manifest.json.standard_claim_policy) covers OWASP-wide forbidden claims. MASVS-STORAGE-2 is bounded by the source standard itself to leaks 'the developer actually has a way to prevent' — claims about preventing OS-level or hardware-level leaks (kernel memory dumps, hardware side channels) are out of scope and should not be inferred. The corpus does not certify completeness against every possible leakage vector; the External Standards Mapping Auditor evaluates evidence against the listed verification_guidance patterns. Only SEC-PILLAR-2-KEYBOARD-CACHE is authoritatively mapped to MASVS-STORAGE-2 in mapping file v1.1; claims about additional Constitution traces covering STORAGE-2's broader leakage surface should reference the auditor evaluation chain, not unverified trace mappings. Tier routing note: file_standards_auditor and external_standards_mapping_auditor are tier-agnostic. Reaper specialist invocation follows the Reaper Conclave tier matrix; the listed Reaper auditors consume this requirement when invoked for the bundle's tier and surface."
+    "claim_boundary_notes": "Standard-level baseline (from manifest.json.standard_claim_policy) covers OWASP-wide forbidden claims. MASVS-STORAGE-2 is bounded by the source standard itself to leaks 'the developer actually has a way to prevent' — claims about preventing OS-level or hardware-level leaks (kernel memory dumps, hardware side channels) are out of scope and should not be inferred. The corpus does not certify completeness against every possible leakage vector; the External Standards Mapping Auditor evaluates evidence against the listed verification_guidance patterns. MASVS-STORAGE-2 is authoritatively mapped to two Constitution v0.5 traces in mapping file v1.2: SEC-PILLAR-2-SENSITIVE-DATA-LEAKAGE-PREVENTION (primary) and SEC-PILLAR-2-KEYBOARD-CACHE (supporting). Tier routing note: file_standards_auditor and external_standards_mapping_auditor are tier-agnostic. Reaper specialist invocation follows the Reaper Conclave tier matrix; the listed Reaper auditors consume this requirement when invoked for the bundle's tier and surface."
   },
 
   "intrinsic_mapping": {
