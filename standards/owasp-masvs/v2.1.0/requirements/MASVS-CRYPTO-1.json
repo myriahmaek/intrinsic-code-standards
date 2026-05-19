@@ -1,0 +1,146 @@
+{
+  "standard_id": "MASVS-CRYPTO-1",
+
+  "normative_source": {
+    "standard_name": "OWASP Mobile Application Security Verification Standard",
+    "standard_version": "2.1.0",
+    "standard_version_date": "2024-01-18",
+    "source_section": "MASVS-CRYPTO: Cryptography — MASVS-CRYPTO-1 (page 20)",
+    "source_locator": "https://mas.owasp.org/MASVS/controls/MASVS-CRYPTO-1/",
+    "requirement_title": "The app employs current strong cryptography and uses it according to industry best practices.",
+    "normative_excerpt": "Per OWASP MASVS v2.1.0 §MASVS-CRYPTO-1 (Description): Cryptography plays an especially important role in securing the user's data - even more so in a mobile environment, where attackers having physical access to the user's device is a likely scenario. This control covers general cryptography best practices, which are typically defined in external standards.",
+    "normative_summary": "Mobile apps that use cryptography must use modern, audited primitives in their current strong form, applied according to industry best practices (typically defined in external standards such as NIST SP 800-175B and NIST SP 800-57). Generic terms like 'encryption' or 'hashing' without named primitives, deprecated algorithms (MD5, SHA-1, RC4, DES), and misused modes (ECB) are non-compliant. The control spans both primitive selection AND usage correctness (RNG, key handling, IV/nonce behavior, API discipline).",
+    "verbatim_allowed": true,
+    "external_references": [
+      "https://mas.owasp.org/MASVS/controls/MASVS-CRYPTO-1/",
+      "https://mas.owasp.org/MASVS/05-MASVS-CRYPTO/",
+      "https://csrc.nist.gov/publications/detail/sp/800-175b/rev-1/final",
+      "https://csrc.nist.gov/publications/detail/sp/800-57-part-1/rev-5/final"
+    ]
+  },
+
+  "source_rights": {
+    "license": "CC-BY-SA-4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "redistribution_allowed": true,
+    "public_archive_allowed": true,
+    "verbatim_excerpt_allowed": true,
+    "attribution_required": true,
+    "license_notes": "Source license recorded from the downloaded OWASP MASVS v2.1.0 PDF artifact. Live website may differ; this corpus pins the artifact license. Verbatim excerpts include attribution per CC-BY-SA-4.0 §3."
+  },
+
+  "source_integrity": {
+    "source_artifact_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
+    "transcription_input_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
+    "requirement_file_sha256": "7b35103870e662c11f9056abca3d2c8f2a13ba5211cc00b6a9725df1bc45c58d"
+  },
+
+  "applicability": {
+    "tier_floor": 1,
+    "conditions_logic": "all",
+    "conditions": [
+      {
+        "field": "security_manifest.crypto_inventory",
+        "operator": "!=",
+        "value": []
+      }
+    ],
+    "human_note": "Applies to every app that declares any cryptographic primitive in its security_manifest.crypto_inventory[]. Per Constitution Pillar 3 (Cryptography & Dependencies), this is universal at Tier 1+. Apps with no cryptography (empty crypto_inventory[]) are formally inapplicable. In practice every Intrinsic Code app at Tier 1+ has at least one entry in crypto_inventory[] because storage, transport, and integrity primitives are baseline."
+  },
+
+  "intrinsic_interpretation": {
+    "interpretation_version": "1.0",
+    "mapping_strength": "partial",
+    "mapping_rationale": "Constitution Pillar 3 directly covers the primitive-selection half of MASVS-CRYPTO-1 (approved-primitive allowlist + forbidden-primitive blocklist enforced at blueprint validation time). MASVS-CRYPTO-1 is broader: it also requires cryptography to be used according to industry best practices (RNG selection, key handling, mode selection, IV/nonce behavior, secure API usage). The usage-correctness half is evaluated by file_standards_auditor (per-file primitive scan + library-API mapping) and reaper-crypto (adversarial audit of crypto correctness in code). The mapping is partial because no single Constitution control alone captures the full breadth of MASVS-CRYPTO-1.",
+    "verification_guidance": {
+      "evidence_locator_types": [
+        "symbol_pattern",
+        "config_pattern",
+        "manifest_entry",
+        "dependency_declaration"
+      ],
+      "expected_evidence_patterns": [
+        "security_manifest.crypto_inventory[].primitive contains only Constitution Pillar 3 allowlist tokens: AES-256-GCM, ChaCha20-Poly1305, Argon2id, X25519, Ed25519, SHA-256, SHA-512",
+        "Cryptographic operations in generated code call platform crypto frameworks (CryptoKit on iOS, javax.crypto / Tink on Android) with named primitives matching the manifest entry",
+        "Compound expressions like 'AES-256-GCM + Argon2id KDF' are accepted by the validator when every token after suffix-stripping is in the Constitution Pillar 3 allowlist",
+        "Third-party crypto libraries are version-pinned in dependency declarations (crypto_inventory[].version_pin or dependency manifest)",
+        "Random number generation uses cryptographically-secure platform RNGs (SecRandomCopyBytes on iOS, SecureRandom on Android), not application-level RNGs"
+      ],
+      "failure_indicators": [
+        "security_manifest.crypto_inventory[].primitive contains any primitive outside the Constitution Pillar 3 allowlist, including deprecated primitives broken by current cryptanalysis (MD5, SHA-1, RC4, DES), insecure modes (ECB), AES-128-CBC, or unnamed generic terms ('encryption', 'encrypted', 'secure', 'hashing', 'modern crypto'). Note: AES-128 in any mode is treated as outside Intrinsic Code's Constitution Pillar 3 allowlist unless explicitly approved by future Constitution revision; this is an Intrinsic Code policy choice, not an OWASP MASVS-specific prohibition.",
+        "Compound expression where any token after suffix-stripping is outside the Constitution Pillar 3 allowlist (e.g., 'AES-256-GCM + MD5' fails — no partial credit)",
+        "Cryptographic code paths use plaintext or trivially-encoded storage when the manifest claims encryption",
+        "Hardcoded cryptographic keys in source code or asset bundles",
+        "Use of application-level or non-cryptographic RNG APIs for key generation, nonce, IV, token, or secret generation. Cryptographically-secure RNGs must use platform security APIs (SecRandomCopyBytes on iOS, SecureRandom on Android)."
+      ],
+      "false_positive_traps": [
+        "Crypto calls inside test fixtures or test-only code paths (paths containing /test/, /tests/, /__tests__/, /spec/ OR functions/methods marked with @Test, @Ignore, @Disabled annotations). Test mocks legitimately use weaker primitives for fixture data; these are not production violations.",
+        "References to deprecated primitives in comments, documentation, or deprecation warnings are not violations — only their use in security-relevant code paths is a violation",
+        "Compatibility shims that wrap deprecated primitives solely to migrate legacy data forward (with declared end-of-life date) are acceptable per Constitution §3 if explicitly declared in security_manifest.crypto_inventory[] with a deprecation_note"
+      ]
+    },
+    "interpretation_review": {
+      "interpretation_authority": "intrinsic_code_internal_review",
+      "review_status": "pre_audit",
+      "external_review_type": "none",
+      "external_reviewer": null,
+      "external_review_date": null,
+      "external_review_scope": null
+    }
+  },
+
+  "standards_body_endorsement": {
+    "endorsed": false,
+    "endorsement_authority": null,
+    "endorsement_evidence_locator": null,
+    "endorsement_evidence_sha256": null,
+    "endorsement_evidence_public_accessibility": false,
+    "endorsement_date": null,
+    "endorsement_scope": null
+  },
+
+  "claim_boundaries": {
+    "allowed_claims": [
+      "uses Constitution Pillar 3 approved cryptographic primitives as supporting evidence toward MASVS-CRYPTO-1 coverage",
+      "rejects Constitution Pillar 3 forbidden primitives as part of MASVS-CRYPTO-1 evaluation"
+    ],
+    "softened_claims": [
+      "addresses MASVS-CRYPTO-1",
+      "aligned with MASVS-CRYPTO-1 strong-cryptography guidance"
+    ],
+    "forbidden_claims": [],
+    "requires_external_certification": false,
+    "claim_boundary_notes": "Standard-level baseline (from manifest.json.standard_claim_policy) already covers OWASP-wide forbidden claims. No requirement-specific additions needed for MASVS-CRYPTO-1. Note that MASVS-CRYPTO-1 does NOT publish a specific approved-primitive list in its control text — it requires 'current strong cryptography' per industry best practices. Constitutional primitives serve as evidence toward MASVS-CRYPTO-1 coverage, not as a strict-subset claim. Claims about cryptographic strength against future cryptanalytic advances (quantum, etc.) are out of scope for this control. Tier routing note: file_standards_auditor and external_standards_mapping_auditor are tier-agnostic. Reaper specialist invocation follows the Reaper Conclave tier matrix; the listed Reaper auditors consume this requirement when invoked for the bundle's tier and surface."
+  },
+
+  "intrinsic_mapping": {
+    "constitution_versions": ["0.4"],
+    "constitutional_trace_ids": [
+      "SEC-PILLAR-3-CRYPTO-PRIMITIVES",
+      "SEC-PILLAR-3-FORBIDDEN-PRIMITIVES"
+    ],
+    "receipt_fields": [
+      "external_standards_summary",
+      "constitutional_traces"
+    ],
+    "auditor_consumers": [
+      "file_standards_auditor",
+      "external_standards_mapping_auditor",
+      "reaper-crypto",
+      "reaper-secrets"
+    ]
+  },
+
+  "lifecycle": {
+    "status": "active",
+    "supersedes": [],
+    "superseded_by": [],
+    "effective_date": "2024-01-18",
+    "withdrawn_date": null
+  },
+
+  "transcription_metadata": {
+    "corpus_version": "v0.1.0",
+    "transcribed_date": "2026-05-19"
+  }
+}

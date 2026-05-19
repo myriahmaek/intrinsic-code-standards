@@ -1,0 +1,148 @@
+{
+  "standard_id": "MASVS-STORAGE-2",
+
+  "normative_source": {
+    "standard_name": "OWASP Mobile Application Security Verification Standard",
+    "standard_version": "2.1.0",
+    "standard_version_date": "2024-01-18",
+    "source_section": "MASVS-STORAGE: Storage — MASVS-STORAGE-2 (page 18)",
+    "source_locator": "https://mas.owasp.org/MASVS/controls/MASVS-STORAGE-2/",
+    "requirement_title": "The app prevents leakage of sensitive data.",
+    "normative_excerpt": "Per OWASP MASVS v2.1.0 §MASVS-STORAGE-2 (Description): There are cases when sensitive data is unintentionally stored or exposed to publicly accessible locations; typically as a side-effect of using certain APIs, system capabilities such as backups or logs. This control covers this kind of unintentional leaks where the developer actually has a way to prevent it.",
+    "normative_summary": "Sensitive data can leak unintentionally through platform features the developer didn't explicitly use for storage: system backups, app logs, keyboard caches, system clipboard, auto-generated screenshots in app switchers, crash reports, analytics SDKs, and IPC mechanisms. MASVS-STORAGE-2 differs from MASVS-STORAGE-1: STORAGE-1 covers data the app intentionally stores; STORAGE-2 covers leaks via side effects. The control is bounded by what the developer can actually prevent — the standard explicitly scopes it to preventable leaks.",
+    "verbatim_allowed": true,
+    "external_references": [
+      "https://mas.owasp.org/MASVS/controls/MASVS-STORAGE-2/",
+      "https://mas.owasp.org/MASVS/02-MASVS-STORAGE/"
+    ]
+  },
+
+  "source_rights": {
+    "license": "CC-BY-SA-4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "redistribution_allowed": true,
+    "public_archive_allowed": true,
+    "verbatim_excerpt_allowed": true,
+    "attribution_required": true,
+    "license_notes": "Source license recorded from the downloaded OWASP MASVS v2.1.0 PDF artifact. Live website may differ; this corpus pins the artifact license. Verbatim excerpts include attribution per CC-BY-SA-4.0 §3."
+  },
+
+  "source_integrity": {
+    "source_artifact_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
+    "transcription_input_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
+    "requirement_file_sha256": "46cbba08b8e15abd4f55dc1c0b3ceaac1c7e084b91031aaf18a38e3f51a596f8"
+  },
+
+  "applicability": {
+    "tier_floor": 3,
+    "conditions_logic": "all",
+    "conditions": [
+      {
+        "field": "security_manifest.app_tier",
+        "operator": ">=",
+        "value": 3
+      }
+    ],
+    "human_note": "Applies to every Tier 3+ app. Effective tier_floor for this MASVS control is 3 per the authoritative SEC-PILLAR-2-KEYBOARD-CACHE mapping in v1.1. Apps at Tier 1-2 with sensitive data still SHOULD address STORAGE-2's broader leakage surface (logs, backups, screenshots, IPC) as defense-in-depth, but the v1.1 corpus does not enforce STORAGE-2 below Tier 3 because no authoritative trace mapping fires there. APPLICABILITY TODO: Sequoia v2.6 raises data-sensitivity questions conversationally during blueprinting but the blueprint schema does not yet land a structured `handles_sensitive_data` boolean or `sensitive_data_classes[]` array that corpus conditions can mechanically check. When that field lands (blueprint schema patch + Scribe extraction + PIPELINE_LANGUAGE §2.5 update), this applicability should migrate to use it directly — that would extend STORAGE-2 coverage below Tier 3 honestly. Also TODO: mapping file v1.2 may add additional Constitution traces (e.g., screen protection, logging discipline, backup configuration) as authoritatively mapped to STORAGE-2; until then, this MASVS control is covered by Pillar 2 keyboard-cache plus file_standards_auditor / reaper-mobile / reaper-privacy auditor judgment on the broader vectors."
+  },
+
+  "intrinsic_interpretation": {
+    "interpretation_version": "1.0",
+    "mapping_strength": "partial",
+    "mapping_rationale": "Mapping file v1.1 authoritatively maps SEC-PILLAR-2-KEYBOARD-CACHE to MASVS-STORAGE-2 with the canonical rationale: 'MASVS-STORAGE-2 requires that sensitive data not be leaked through unintended storage mechanisms. Keyboard caches are a documented unintended storage vector for credentials and PII; disabling them on sensitive fields directly addresses this requirement.' The mapping is partial because MASVS-STORAGE-2's leakage surface is broad — beyond keyboard caches, it covers backups, logs, screenshots, clipboard, crash reports, analytics SDK exfiltration, and IPC mechanisms. The keyboard-cache trace directly covers one important vector; the other vectors are evaluated by file_standards_auditor (per-file scanning for logged-sensitive-data and improper backup config) and the Reaper specialists reaper-mobile (mobile platform attack surface) and reaper-privacy (PII handling correctness). Mapping file v1.2 may add additional Constitution traces (e.g., backup-exclusion configuration, screen protection scoped to STORAGE-2's leakage frame) as authoritatively mapped to STORAGE-2; until then, this corpus relies on the keyboard-cache trace plus auditor judgment for the long tail.",
+    "verification_guidance": {
+      "evidence_locator_types": [
+        "symbol_pattern",
+        "config_pattern",
+        "manifest_entry",
+        "build_setting",
+        "entitlement_declaration"
+      ],
+      "expected_evidence_patterns": [
+        "iOS: NSURLIsExcludedFromBackupKey set on files containing sensitive data; Info.plist NSExcludedFromBackup configured for sensitive directories",
+        "Android: backup_rules.xml explicitly excludes sensitive directories; android:fullBackupContent declared; android:dataExtractionRules declared for Android 12+",
+        "Tier 3+ sensitive input fields disable keyboard cache per SEC-PILLAR-2-KEYBOARD-CACHE: iOS textContentType set appropriately (.password, .creditCardNumber, .oneTimeCode) and autocorrectionType = .no; Android android:inputType includes textNoSuggestions or textPassword/textVisiblePassword",
+        "Screenshot protection on sensitive screens: iOS application willResignActiveNotification → cover-view overlay or window.isHidden = true; Android getWindow().setFlags(FLAG_SECURE, FLAG_SECURE) on sensitive Activities/Fragments",
+        "Logging guards: sensitive values redacted or omitted from NSLog/Log.d/print/console.log calls; production logging gated on DEBUG-only build flags",
+        "Clipboard discipline: when sensitive data is copied to clipboard (passwords, OTPs), clipboard cleared after time-bounded interval (iOS UIPasteboard.expirationDate, Android ClipboardManager + delayed clear)"
+      ],
+      "failure_indicators": [
+        "Sensitive data values present in NSLog/Log.d/print/console.log/os_log calls in production-reachable code paths",
+        "android:allowBackup=\"true\" without backup_rules.xml exclusion rules for sensitive directories (Android default behavior backs up everything)",
+        "Sensitive input fields (passwords, credit cards, government IDs, OTP codes) without keyboard cache disabling where required by Constitution Pillar 2 for the declared tier",
+        "Sensitive screens without screenshot protection where the Constitution requires it for the declared tier and data surface",
+        "Crash reporting SDKs (Crashlytics, Sentry, Bugsnag) configured without explicit PII scrubbing rules",
+        "Sensitive data passed through IPC mechanisms (iOS UIActivityViewController, Android Intent extras, Content Providers) without explicit redaction"
+      ],
+      "false_positive_traps": [
+        "Logging non-sensitive operational data (cache hit rates, screen-load timings, API endpoint identifiers) is acceptable",
+        "Backup of non-sensitive data (user preferences, app theme, language) is acceptable — only sensitive data triggers backup-exclusion requirements",
+        "Test fixtures (paths containing /test/, /tests/, /__tests__/, /spec/ OR functions marked @Test, @Ignore, @Disabled) using verbose logging are not production violations",
+        "Screenshot protection is not required on non-sensitive screens (settings, about, help, marketing surfaces)",
+        "Clipboard usage for non-sensitive data (copy-link, copy-message-text) does not require time-bounded clearing"
+      ]
+    },
+    "interpretation_review": {
+      "interpretation_authority": "intrinsic_code_internal_review",
+      "review_status": "pre_audit",
+      "external_review_type": "none",
+      "external_reviewer": null,
+      "external_review_date": null,
+      "external_review_scope": null
+    }
+  },
+
+  "standards_body_endorsement": {
+    "endorsed": false,
+    "endorsement_authority": null,
+    "endorsement_evidence_locator": null,
+    "endorsement_evidence_sha256": null,
+    "endorsement_evidence_public_accessibility": false,
+    "endorsement_date": null,
+    "endorsement_scope": null
+  },
+
+  "claim_boundaries": {
+    "allowed_claims": [
+      "disables keyboard cache on sensitive fields per Constitution Pillar 2 (SEC-PILLAR-2-KEYBOARD-CACHE, Tier 3+) as evidence toward MASVS-STORAGE-2 coverage",
+      "provides evidence toward MASVS-STORAGE-2 coverage via keyboard-cache control plus auditor evaluation of additional leakage vectors (backup, screenshot, logging)"
+    ],
+    "softened_claims": [
+      "addresses MASVS-STORAGE-2",
+      "aligned with MASVS-STORAGE-2 leakage-prevention guidance"
+    ],
+    "forbidden_claims": [],
+    "requires_external_certification": false,
+    "claim_boundary_notes": "Standard-level baseline (from manifest.json.standard_claim_policy) covers OWASP-wide forbidden claims. MASVS-STORAGE-2 is bounded by the source standard itself to leaks 'the developer actually has a way to prevent' — claims about preventing OS-level or hardware-level leaks (kernel memory dumps, hardware side channels) are out of scope and should not be inferred. The corpus does not certify completeness against every possible leakage vector; the External Standards Mapping Auditor evaluates evidence against the listed verification_guidance patterns. Only SEC-PILLAR-2-KEYBOARD-CACHE is authoritatively mapped to MASVS-STORAGE-2 in mapping file v1.1; claims about additional Constitution traces covering STORAGE-2's broader leakage surface should reference the auditor evaluation chain, not unverified trace mappings. Tier routing note: file_standards_auditor and external_standards_mapping_auditor are tier-agnostic. Reaper specialist invocation follows the Reaper Conclave tier matrix; the listed Reaper auditors consume this requirement when invoked for the bundle's tier and surface."
+  },
+
+  "intrinsic_mapping": {
+    "constitution_versions": ["0.4"],
+    "constitutional_trace_ids": [
+      "SEC-PILLAR-2-KEYBOARD-CACHE"
+    ],
+    "receipt_fields": [
+      "external_standards_summary",
+      "constitutional_traces"
+    ],
+    "auditor_consumers": [
+      "file_standards_auditor",
+      "external_standards_mapping_auditor",
+      "reaper-mobile",
+      "reaper-privacy"
+    ]
+  },
+
+  "lifecycle": {
+    "status": "active",
+    "supersedes": [],
+    "superseded_by": [],
+    "effective_date": "2024-01-18",
+    "withdrawn_date": null
+  },
+
+  "transcription_metadata": {
+    "corpus_version": "v0.1.0",
+    "transcribed_date": "2026-05-19"
+  }
+}

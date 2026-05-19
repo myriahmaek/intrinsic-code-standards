@@ -1,0 +1,150 @@
+{
+  "standard_id": "MASVS-STORAGE-1",
+
+  "normative_source": {
+    "standard_name": "OWASP Mobile Application Security Verification Standard",
+    "standard_version": "2.1.0",
+    "standard_version_date": "2024-01-18",
+    "source_section": "MASVS-STORAGE: Storage — MASVS-STORAGE-1 (page 18)",
+    "source_locator": "https://mas.owasp.org/MASVS/controls/MASVS-STORAGE-1/",
+    "requirement_title": "The app securely stores sensitive data.",
+    "normative_excerpt": "Per OWASP MASVS v2.1.0 §MASVS-STORAGE-1 (Description): Apps handle sensitive data coming from many sources such as the user, the backend, system services or other apps on the device and usually need to store it locally. The storage locations may be private to the app (e.g. its internal storage) or be public and therefore accessible by the user or other installed apps (e.g. public folders such as Downloads). This control ensures that any sensitive data that is intentionally stored by the app is properly protected independently of the target location.",
+    "normative_summary": "Sensitive data intentionally stored by the app — credentials, PII, cryptographic material, secrets, API keys — must be protected regardless of whether storage is app-private (internal sandbox) or app-public (Downloads folder, shared storage). Persistent plain-text storage of sensitive data outside approved platform-protected storage or approved encrypted storage is non-compliant. Expected evidence includes platform secure storage (iOS Keychain / Secure Enclave; Android Keystore / Jetpack Security) or encryption with proper key management before storing in app-private locations, and never storing sensitive data in user-accessible locations.",
+    "verbatim_allowed": true,
+    "external_references": [
+      "https://mas.owasp.org/MASVS/controls/MASVS-STORAGE-1/",
+      "https://mas.owasp.org/MASVS/02-MASVS-STORAGE/"
+    ]
+  },
+
+  "source_rights": {
+    "license": "CC-BY-SA-4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "redistribution_allowed": true,
+    "public_archive_allowed": true,
+    "verbatim_excerpt_allowed": true,
+    "attribution_required": true,
+    "license_notes": "Source license recorded from the downloaded OWASP MASVS v2.1.0 PDF artifact. Live website may differ; this corpus pins the artifact license. Verbatim excerpts include attribution per CC-BY-SA-4.0 §3."
+  },
+
+  "source_integrity": {
+    "source_artifact_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
+    "transcription_input_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
+    "requirement_file_sha256": "51140208bd8dac005c7e5bad3c48b949f1335bbde6ef6cca10ba5414108e6c0f"
+  },
+
+  "applicability": {
+    "tier_floor": 1,
+    "conditions_logic": "any",
+    "conditions": [
+      {
+        "field": "security_manifest.data_retention_policies",
+        "operator": "!=",
+        "value": []
+      },
+      {
+        "field": "security_manifest.secrets_inventory",
+        "operator": "!=",
+        "value": []
+      }
+    ],
+    "human_note": "Applies to every app that stores any sensitive data locally. The two conditions are OR'd: applicability is satisfied if either the data retention policies declare any data class for local storage OR if secrets are declared. Mapped Constitution traces have tier_floor 1 (SEC-PILLAR-3-SECURE-STORAGE applies at all tiers; SEC-PILLAR-2-RETENTION-POLICY applies at Tier 2+). Effective tier_floor for this MASVS control is 1, driven by the lower of the two trace floors. In practice every Intrinsic Code app at Tier 1+ stores some sensitive data (at minimum, app preferences containing user identifiers or settings), so this control is effectively universal."
+  },
+
+  "intrinsic_interpretation": {
+    "interpretation_version": "1.0",
+    "mapping_strength": "partial",
+    "mapping_rationale": "Two Constitution v0.4 traces are authoritatively mapped to MASVS-STORAGE-1 in mapping file v1.1. SEC-PILLAR-3-SECURE-STORAGE provides the platform-native storage mechanism (iOS Keychain / Secure Enclave; Android Keystore / Jetpack Security) per the mapping file's canonical rationale: 'MASVS-STORAGE-1 requires sensitive data be stored in platform-provided secure storage rather than application-managed storage. Pillar 3's mandatory use of iOS Keychain/Secure Enclave and Android Keystore/Jetpack Security is the direct platform-native implementation of this requirement.' SEC-PILLAR-2-RETENTION-POLICY provides the design-layer enforcement per the mapping file: 'MASVS-STORAGE-1 requires that storage of sensitive data be needs-justified and minimized. Per-data-type retention policies in the manifest enforce this requirement at the design layer.' The mapping is partial because MASVS-STORAGE-1 also requires correct usage discipline (e.g., not writing sensitive data to logs that get backed up, not storing sensitive data in shared preferences without encryption, classification of which data counts as sensitive). The classification and usage-discipline portions are evaluated by file_standards_auditor and reaper-secrets at file-and-bundle level.",
+    "verification_guidance": {
+      "evidence_locator_types": [
+        "symbol_pattern",
+        "config_pattern",
+        "manifest_entry",
+        "code_comment"
+      ],
+      "expected_evidence_patterns": [
+        "iOS: Keychain Services API calls (SecItemAdd, SecItemCopyMatching) for credentials, tokens, and cryptographic keys with appropriate kSecAttrAccessible accessibility classes",
+        "Android: EncryptedSharedPreferences (Jetpack Security) or Android Keystore (KeyStore.getInstance, MasterKey.Builder) for sensitive values; NOT plain SharedPreferences",
+        "security_manifest.secrets_inventory[] entries each declare classification (server-only, client-buildtime, client-runtime, public) per Constitution Pillar 3 secrets discipline",
+        "security_manifest.data_retention_policies[] entries each declare data class with explicit retention duration; sensitive classes (PII, credentials, payment) routed to secure storage",
+        "Generated code routes sensitive data through SecureStorage abstraction (services/SecureStorage.swift, security/SecureStorage.kt) per Scaffolder Tier 2+ baseline"
+      ],
+      "failure_indicators": [
+        "iOS: Sensitive data written to UserDefaults (NSUserDefaults), plist files, or Documents/ directory without encryption",
+        "Android: Sensitive data written to plain SharedPreferences, getExternalStorageDirectory, or app-public files without encryption",
+        "Credentials, API keys, or cryptographic keys hardcoded in source files or asset bundles",
+        "security_manifest.secrets_inventory[] missing classification field on any entry",
+        "Sensitive data written to log files (NSLog, Log.d, print, console.log) where logs may be backed up to iCloud/Google or accessed by other apps with appropriate permissions",
+        "Backup configuration includes sensitive data (iOS: missing NSURLIsExcludedFromBackupKey on sensitive files; Android: android:allowBackup=\"true\" without explicit exclusion rules in backup_rules.xml)"
+      ],
+      "false_positive_traps": [
+        "Non-sensitive app preferences (user-chosen theme, last-opened tab, language preference) stored in UserDefaults / SharedPreferences are NOT violations — only sensitive data triggers this control",
+        "Cache directories (NSCachesDirectory on iOS, getCacheDir() on Android) used for non-sensitive ephemeral data are acceptable; sensitive data in cache is still a violation",
+        "Test fixtures (paths containing /test/, /tests/, /__tests__/, /spec/ OR functions marked @Test, @Ignore, @Disabled) using plain storage for test data are not production violations",
+        "Public configuration values declared as classification: public in secrets_inventory[] may be stored in plain locations (that classification specifically indicates non-sensitive)"
+      ]
+    },
+    "interpretation_review": {
+      "interpretation_authority": "intrinsic_code_internal_review",
+      "review_status": "pre_audit",
+      "external_review_type": "none",
+      "external_reviewer": null,
+      "external_review_date": null,
+      "external_review_scope": null
+    }
+  },
+
+  "standards_body_endorsement": {
+    "endorsed": false,
+    "endorsement_authority": null,
+    "endorsement_evidence_locator": null,
+    "endorsement_evidence_sha256": null,
+    "endorsement_evidence_public_accessibility": false,
+    "endorsement_date": null,
+    "endorsement_scope": null
+  },
+
+  "claim_boundaries": {
+    "allowed_claims": [
+      "routes sensitive data through Constitution Pillar 3 secure storage primitives (Keychain/Secure Enclave on iOS, Keystore/Jetpack Security on Android) as supporting evidence toward MASVS-STORAGE-1 coverage",
+      "enforces per-data-type retention policies per Constitution Pillar 2 as supporting evidence toward MASVS-STORAGE-1 coverage"
+    ],
+    "softened_claims": [
+      "addresses MASVS-STORAGE-1",
+      "aligned with MASVS-STORAGE-1 secure-storage guidance"
+    ],
+    "forbidden_claims": [],
+    "requires_external_certification": false,
+    "claim_boundary_notes": "Standard-level baseline (from manifest.json.standard_claim_policy) covers OWASP-wide forbidden claims. The corpus does not certify what counts as 'sensitive' for any specific app — sensitivity classification depends on the app's specific data semantics and the founder's threat model. MASVS-STORAGE-1 requires the developer to make this determination; the corpus enforces structural protection mechanisms once classification is declared. Tier routing note: file_standards_auditor and external_standards_mapping_auditor are tier-agnostic. Reaper specialist invocation follows the Reaper Conclave tier matrix; the listed Reaper auditors consume this requirement when invoked for the bundle's tier and surface."
+  },
+
+  "intrinsic_mapping": {
+    "constitution_versions": ["0.4"],
+    "constitutional_trace_ids": [
+      "SEC-PILLAR-3-SECURE-STORAGE",
+      "SEC-PILLAR-2-RETENTION-POLICY"
+    ],
+    "receipt_fields": [
+      "external_standards_summary",
+      "constitutional_traces"
+    ],
+    "auditor_consumers": [
+      "file_standards_auditor",
+      "external_standards_mapping_auditor",
+      "reaper-secrets"
+    ]
+  },
+
+  "lifecycle": {
+    "status": "active",
+    "supersedes": [],
+    "superseded_by": [],
+    "effective_date": "2024-01-18",
+    "withdrawn_date": null
+  },
+
+  "transcription_metadata": {
+    "corpus_version": "v0.1.0",
+    "transcribed_date": "2026-05-19"
+  }
+}

@@ -12,10 +12,10 @@
   },
   "standards": {
     "MASVS": {
-      "status": "not_transcribed",
-      "current_version": null,
-      "verified_at": null,
-      "reason": "Pending Round 1 corpus authoring"
+      "status": "active",
+      "current_version": "2.1.0",
+      "verified_at": "2026-05-18",
+      "reason": "MASVS v2.1.0 active in corpus v0.1.0. Batch 1 of 8 committed (CRYPTO-1, STORAGE-1, STORAGE-2); remaining 21 requirements pending Batches 2-8."
     },
     "NIST-800-63": {
       "status": "not_transcribed",

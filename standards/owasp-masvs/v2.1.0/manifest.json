@@ -1,0 +1,70 @@
+{
+  "standard_id_prefix": "MASVS",
+  "standard_name": "OWASP Mobile Application Security Verification Standard",
+  "standard_version": "2.1.0",
+  "standard_version_date": "2024-01-18",
+  "source_archive_public": "../../../source-archives/public/owasp-masvs-v2.1.0.pdf",
+  "source_archive_private_hash": null,
+  "requirement_count": 24,
+  "requirement_ids": [
+    "MASVS-STORAGE-1",
+    "MASVS-STORAGE-2",
+    "MASVS-CRYPTO-1",
+    "MASVS-CRYPTO-2",
+    "MASVS-AUTH-1",
+    "MASVS-AUTH-2",
+    "MASVS-AUTH-3",
+    "MASVS-NETWORK-1",
+    "MASVS-NETWORK-2",
+    "MASVS-PLATFORM-1",
+    "MASVS-PLATFORM-2",
+    "MASVS-PLATFORM-3",
+    "MASVS-CODE-1",
+    "MASVS-CODE-2",
+    "MASVS-CODE-3",
+    "MASVS-CODE-4",
+    "MASVS-RESILIENCE-1",
+    "MASVS-RESILIENCE-2",
+    "MASVS-RESILIENCE-3",
+    "MASVS-RESILIENCE-4",
+    "MASVS-PRIVACY-1",
+    "MASVS-PRIVACY-2",
+    "MASVS-PRIVACY-3",
+    "MASVS-PRIVACY-4"
+  ],
+  "superseded_versions": [],
+  "current": true,
+  "added_to_corpus_version": "v0.1.0",
+  "last_reviewed_corpus_version": "v0.1.0",
+
+  "standard_claim_policy": {
+    "standards_body_certification_available": false,
+    "certification_disclaimer_present": true,
+    "certification_disclaimer": "OWASP does not certify, accredit, or formally validate applications, products, vendors, or organizations against MASVS. The standard provides a baseline for mobile application security verification; conformance is self-asserted or third-party-assessed but never OWASP-certified.",
+    "certification_disclaimer_source_section": "OWASP MASVS v2.1.0, source PDF page 15 (introduction / scope discussion of OWASP's non-certifying posture)",
+    "standard_baseline_forbidden_claims": [
+      "OWASP-certified",
+      "OWASP MASVS certified",
+      "MASVS-certified",
+      "certified to MASVS",
+      "officially compliant with MASVS",
+      "endorsed by OWASP",
+      "OWASP-endorsed",
+      "OWASP-approved",
+      "OWASP-validated",
+      "passed OWASP MASVS certification",
+      "MASVS-compliant"
+    ],
+    "standard_baseline_allowed_claims": [
+      "evaluated against OWASP MASVS v2.1.0 controls",
+      "implements controls described by OWASP MASVS v2.1.0",
+      "provides evidence toward OWASP MASVS v2.1.0 control coverage"
+    ],
+    "standard_baseline_softened_claims": [
+      "addresses OWASP MASVS controls",
+      "aligned with OWASP MASVS guidance",
+      "follows OWASP MASVS verification recommendations"
+    ],
+    "standard_policy_notes": "OWASP MASVS is a verification standard, not a certification program. The OWASP Foundation explicitly does not certify applications against MASVS. Per LOAD-14: any requirement under this standard with standards_body_endorsement.endorsed: true is a corpus load failure. Per three-tier inheritance: every MASVS requirement file inherits these forbidden_claims; per-requirement claim_boundaries.forbidden_claims may add to but never un-forbid these. The phrase 'MASVS-compliant' is forbidden because OWASP itself uses 'evaluated against' / 'verifies' language rather than 'compliant'; using 'compliant' implies an authority OWASP does not assert."
+  }
+}
