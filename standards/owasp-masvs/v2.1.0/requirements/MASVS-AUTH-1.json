@@ -1,0 +1,150 @@
+{
+  "standard_id": "MASVS-AUTH-1",
+
+  "normative_source": {
+    "standard_name": "OWASP Mobile Application Security Verification Standard",
+    "standard_version": "2.1.0",
+    "standard_version_date": "2024-01-18",
+    "source_section": "MASVS-AUTH: Authentication and Authorization — MASVS-AUTH-1 (page 22)",
+    "source_locator": "https://mas.owasp.org/MASVS/controls/MASVS-AUTH-1/",
+    "requirement_title": "The app uses secure authentication and authorization protocols and follows the relevant best practices.",
+    "normative_excerpt": "Per OWASP MASVS v2.1.0 §MASVS-AUTH-1 (Description): Most apps connecting to a remote endpoint require user authentication and also enforce some kind of authorization. While the enforcement of these mechanisms must be on the remote endpoint, the apps also have to ensure that it follows all the relevant best practices to ensure a secure use of the involved protocols.",
+    "normative_summary": "Mobile apps connecting to remote endpoints must use secure authentication and authorization protocols on the client side, following relevant best practices for the involved protocols (OAuth 2.0 redirect URI validation, secure token storage, proper session expiration, logout discipline, authorization boundary enforcement). While the remote endpoint enforces the authoritative auth decision, the app must not undermine the protocol's security through client-side mistakes (token leakage, insecure redirect handlers, missing logout cleanup, weak session integrity).",
+    "verbatim_allowed": true,
+    "external_references": [
+      "https://mas.owasp.org/MASVS/controls/MASVS-AUTH-1/",
+      "https://mas.owasp.org/MASVS/06-MASVS-AUTH/",
+      "https://datatracker.ietf.org/doc/html/rfc6749"
+    ]
+  },
+
+  "source_rights": {
+    "license": "CC-BY-SA-4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "redistribution_allowed": true,
+    "public_archive_allowed": true,
+    "verbatim_excerpt_allowed": true,
+    "attribution_required": true,
+    "license_notes": "Source license recorded from the downloaded OWASP MASVS v2.1.0 PDF artifact. Live website may differ; this corpus pins the artifact license. Verbatim excerpts include attribution per CC-BY-SA-4.0 §3."
+  },
+
+  "source_integrity": {
+    "source_artifact_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
+    "transcription_input_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
+    "requirement_file_sha256": "982f8f9f715873d501fd48f6cb4ae7229eb902edd9c5066833822f087d39c565"
+  },
+
+  "applicability": {
+    "tier_floor": 3,
+    "conditions_logic": "all",
+    "conditions": [
+      {
+        "field": "technical.auth_flow",
+        "operator": "!=",
+        "value": "none"
+      }
+    ],
+    "human_note": "Applies to every app that declares an authentication flow (technical.auth_flow != \"none\"). Per Constitution Pillar 4 (Authentication & Identity), authentication discipline activates at Tier 3+ where the app handles user authentication and private user-to-user content. Apps with no authentication (technical.auth_flow == \"none\") are formally inapplicable. In practice every Intrinsic Code app at Tier 3+ requires authentication because messaging, sharing, and identity claims are baseline Tier 3 features."
+  },
+
+  "intrinsic_interpretation": {
+    "interpretation_version": "1.0",
+    "mapping_strength": "partial",
+    "mapping_rationale": "Constitution Pillar 4 covers MASVS-AUTH-1 via two complementary traces: SEC-PILLAR-4-PHISHING-RESISTANT-AUTH (primary, current industry best practice for mobile authentication mechanism — Passkeys, platform biometrics) and SEC-PILLAR-4-AUTH-SESSION-INTEGRITY (primary for the session-and-protocol layer — tokens, OAuth flows, logout discipline, authorization boundaries, session-secret protection). MASVS-AUTH-1's scope spans both authentication mechanism AND protocol-correct usage; Constitution distributes these across two traces because they're separable concerns at the design layer. Implementation correctness for OAuth flows (redirect URI validation per RFC 6749 §10.6, state parameter enforcement, PKCE for public clients) requires auditor judgment beyond manifest declaration. The mapping is partial because no single Constitution control captures the full breadth of MASVS-AUTH-1, but the two-trace coverage substantively addresses both the mechanism and the protocol-usage halves.",
+    "verification_guidance": {
+      "evidence_locator_types": [
+        "symbol_pattern",
+        "config_pattern",
+        "manifest_entry",
+        "dependency_declaration"
+      ],
+      "expected_evidence_patterns": [
+        "security_manifest declares authentication mechanism using phishing-resistant primitives (Passkeys via AuthenticationServices on iOS, Credentials API / Android Identity on Android) — not username+password as primary",
+        "OAuth 2.0 integrations use platform OAuth libraries (ASWebAuthenticationSession on iOS, AppAuth or CustomTabsClient on Android) — not raw WebView for OAuth flows",
+        "OAuth redirect URIs validated per RFC 6749 §10.6 — exact-match check against pre-registered URIs, no wildcard matching",
+        "Session tokens stored in platform secure storage (Keychain on iOS, EncryptedSharedPreferences/Keystore on Android) — not UserDefaults or SharedPreferences plaintext",
+        "Logout flow cryptographically invalidates session state — clears token storage, calls server-side revocation endpoint where supported, resets in-memory authorization state",
+        "Authorization checks happen at every sensitive operation boundary, not just initial login"
+      ],
+      "failure_indicators": [
+        "Username + password as sole authentication mechanism without phishing-resistant alternative (Passkeys, platform biometrics) declared in manifest",
+        "OAuth redirect handled via custom URL scheme without exact-match validation against pre-registered URIs (vulnerable to authorization code interception per RFC 6749 §10.6)",
+        "Session tokens stored in plaintext: UserDefaults on iOS, SharedPreferences without Jetpack Security on Android, plain files in app sandbox",
+        "Session tokens logged to application logs, included in crash reports, transmitted in URL query parameters (visible in referrer headers and server logs), or included in analytics payloads",
+        "Logout flow that only clears UI state without invalidating tokens or calling revocation endpoint — session continues server-side",
+        "Authorization decisions made client-side only without server-side enforcement (client-side authorization can be bypassed by a tampered binary)",
+        "OAuth flows implemented in raw WebView with JavaScript bridges (loses platform protection, exposes token interception surface)"
+      ],
+      "false_positive_traps": [
+        "Authentication handling inside test fixtures or test-only code paths (paths containing /test/, /tests/, /__tests__/, /spec/ OR functions/methods marked with @Test, @Ignore, @Disabled annotations). Test mocks legitimately use stub credentials; these are not production violations.",
+        "Public-client OAuth flows (no client secret) are NOT a violation — mobile apps are public clients per RFC 6749, and PKCE is the correct mitigation. Verify PKCE is in use, not that a client secret exists.",
+        "Anonymous/guest authentication flows that declare no user identity are NOT a MASVS-AUTH-1 violation if the app's threat model accepts unauthenticated state for those operations. The applicability condition (technical.auth_flow != \"none\") already filters this case.",
+        "Server-issued revocation that takes time to propagate is NOT a violation of logout discipline as long as the client clears local state immediately and calls the revocation endpoint best-effort. Server-side propagation lag is a remote-endpoint concern."
+      ]
+    },
+    "interpretation_review": {
+      "interpretation_authority": "intrinsic_code_internal_review",
+      "review_status": "pre_audit",
+      "external_review_type": "none",
+      "external_reviewer": null,
+      "external_review_date": null,
+      "external_review_scope": null
+    }
+  },
+
+  "standards_body_endorsement": {
+    "endorsed": false,
+    "endorsement_authority": null,
+    "endorsement_evidence_locator": null,
+    "endorsement_evidence_sha256": null,
+    "endorsement_evidence_public_accessibility": false,
+    "endorsement_date": null,
+    "endorsement_scope": null
+  },
+
+  "claim_boundaries": {
+    "allowed_claims": [
+      "uses Constitution Pillar 4 phishing-resistant authentication (SEC-PILLAR-4-PHISHING-RESISTANT-AUTH) as primary evidence toward MASVS-AUTH-1 coverage on the authentication-mechanism layer",
+      "uses Constitution Pillar 4 session-integrity discipline (SEC-PILLAR-4-AUTH-SESSION-INTEGRITY) as primary evidence toward MASVS-AUTH-1 coverage on the session-and-protocol layer",
+      "validates OAuth redirect URIs per RFC 6749 §10.6 as part of MASVS-AUTH-1 evaluation"
+    ],
+    "softened_claims": [
+      "addresses MASVS-AUTH-1",
+      "aligned with MASVS-AUTH-1 secure-authentication guidance"
+    ],
+    "forbidden_claims": [],
+    "requires_external_certification": false,
+    "claim_boundary_notes": "Standard-level baseline (from manifest.json.standard_claim_policy) already covers OWASP-wide forbidden claims. No requirement-specific additions needed for MASVS-AUTH-1. MASVS-AUTH-1 is mapped to two Constitution v0.5 traces in mapping file v1.2: SEC-PILLAR-4-PHISHING-RESISTANT-AUTH (primary, mechanism layer) and SEC-PILLAR-4-AUTH-SESSION-INTEGRITY (primary, session/protocol layer). MASVS-AUTH-1 explicitly scopes its security claims to the client-side discipline (\"the enforcement of these mechanisms must be on the remote endpoint\"); claims about server-side authorization enforcement are out of scope for this control. Tier routing handled downstream by Reaper Conclave matrix; the listed Reaper auditors consume this requirement when invoked for the bundle's tier and surface."
+  },
+
+  "intrinsic_mapping": {
+    "constitution_versions": ["0.5"],
+    "constitutional_trace_ids": [
+      "SEC-PILLAR-4-PHISHING-RESISTANT-AUTH",
+      "SEC-PILLAR-4-AUTH-SESSION-INTEGRITY"
+    ],
+    "receipt_fields": [
+      "external_standards_summary",
+      "constitutional_traces"
+    ],
+    "auditor_consumers": [
+      "file_standards_auditor",
+      "external_standards_mapping_auditor",
+      "reaper-auth",
+      "reaper-secrets"
+    ]
+  },
+
+  "lifecycle": {
+    "status": "active",
+    "supersedes": [],
+    "superseded_by": [],
+    "effective_date": "2024-01-18",
+    "withdrawn_date": null
+  },
+
+  "transcription_metadata": {
+    "corpus_version": "v0.1.0",
+    "transcribed_date": "2026-05-19"
+  }
+}
