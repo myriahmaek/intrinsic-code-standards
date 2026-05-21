@@ -1,0 +1,160 @@
+{
+  "standard_id": "MASVS-PLATFORM-1",
+
+  "normative_source": {
+    "standard_name": "OWASP Mobile Application Security Verification Standard",
+    "standard_version": "2.1.0",
+    "standard_version_date": "2024-01-18",
+    "source_section": "MASVS-PLATFORM: Platform Interaction — MASVS-PLATFORM-1 (page 26)",
+    "source_locator": "https://mas.owasp.org/MASVS/controls/MASVS-PLATFORM-1/",
+    "requirement_title": "The app uses IPC mechanisms securely.",
+    "normative_excerpt": "Per OWASP MASVS v2.1.0 §MASVS-PLATFORM-1 (Description): Apps typically use platform provided IPC mechanisms to intentionally expose data or functionality. Both installed apps and the user are able to interact with the app in many different ways. This control ensures that all interactions involving IPC mechanisms happen securely.",
+    "normative_summary": "Mobile apps must secure every IPC mechanism they expose — deep links, URL schemes, Android Intents, iOS App Extensions, share extensions, ContentProviders, Universal Links, and any other platform-provided inter-process communication surface. Each IPC entry point must validate the caller's origin, parse payloads with typed unmarshalling, enforce platform permission gates, and refuse to expose sensitive data through IPC channels (no PII in Intent extras, URL parameters, or extension contexts).",
+    "verbatim_allowed": true,
+    "external_references": [
+      "https://mas.owasp.org/MASVS/controls/MASVS-PLATFORM-1/",
+      "https://mas.owasp.org/MASVS/08-MASVS-PLATFORM/",
+      "https://developer.apple.com/documentation/xcode/defining-a-custom-url-scheme-for-your-app",
+      "https://developer.apple.com/documentation/xcode/supporting-universal-links-in-your-app",
+      "https://developer.android.com/training/app-links",
+      "https://developer.android.com/guide/components/intents-filters"
+    ]
+  },
+
+  "source_rights": {
+    "license": "CC-BY-SA-4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "redistribution_allowed": true,
+    "public_archive_allowed": true,
+    "verbatim_excerpt_allowed": true,
+    "attribution_required": true,
+    "license_notes": "Source license recorded from the downloaded OWASP MASVS v2.1.0 PDF artifact. Live website may differ; this corpus pins the artifact license. Verbatim excerpts include attribution per CC-BY-SA-4.0 §3."
+  },
+
+  "source_integrity": {
+    "source_artifact_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
+    "transcription_input_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
+    "requirement_file_sha256": "527f0b17587a905162bf12b541e09f8468808fdddc9ec65ec7c18445391e3ba7"
+  },
+
+  "applicability": {
+    "tier_floor": 2,
+    "conditions_logic": "all",
+    "conditions": [
+      {
+        "field": "security_manifest.app_tier",
+        "operator": ">=",
+        "value": 2
+      }
+    ],
+    "human_note": "Applies at Tier 2+ as a conservative corpus-level gate. Per Constitution Pillar 5 (Secure Architecture & Runtime), IPC discipline activates at Tier 2+ where the app handles content distribution and analytics. The blueprint schema does not currently declare a discrete IPC-presence field, so security_manifest.app_tier >= 2 is used as a broad proxy for apps that expose or consume platform IPC surfaces — deep links, custom URL schemes, Android Intents, iOS Universal Links, ContentProviders, and App Extensions. If no IPC exposure exists in a given app, auditors may mark the requirement not-applicable during evidence review. A future schema enhancement (banked: security_manifest.ipc_surfaces[] declaration) will let MASVS-PLATFORM-1 fire only when IPC exposure is declared. In practice most Intrinsic Code apps at Tier 2+ expose at least one IPC surface because deep linking and platform notification handling are common Tier 2+ features."
+  },
+
+  "intrinsic_interpretation": {
+    "interpretation_version": "1.0",
+    "mapping_strength": "partial",
+    "mapping_rationale": "Constitution Pillar 5 covers MASVS-PLATFORM-1 via one dedicated primary trace and three supporting traces. SEC-PILLAR-5-IPC-BOUNDARY (primary) is the dedicated Constitutional control for IPC mechanisms — it requires every IPC entry point (deep links, URL schemes, Intents, App Extensions, share extensions, ContentProviders, Universal Links) to validate origin, parse payloads with typed unmarshalling, enforce platform permission gates, and refuse to expose sensitive data through IPC channels. SEC-PILLAR-5-SCREEN-PROTECTION (supporting) covers the screen-capture-as-IPC vector (app switcher screenshots leak sensitive content if not masked). SEC-PILLAR-5-UI-INTEGRITY (supporting) covers the view-isolation-vs-overlay vector (tapjacking attacks targeting IPC surfaces). SEC-PILLAR-5-WEBVIEW-DISCIPLINE (supporting) covers the JavaScript-bridges-as-IPC vector (JS bridges to native code are functionally IPC). The mapping is partial because no single Constitution trace covers all IPC vectors PLATFORM-1 spans, but the dedicated primary plus three vector-specific supporting traces substantively address the full IPC discipline surface. Implementation correctness for per-mechanism validation (Universal Link associated domains, App Link autoVerify, Intent action filtering, ContentProvider URI permissions) requires auditor judgment beyond manifest declaration.",
+    "verification_guidance": {
+      "evidence_locator_types": [
+        "symbol_pattern",
+        "config_pattern",
+        "manifest_entry",
+        "dependency_declaration"
+      ],
+      "expected_evidence_patterns": [
+        "iOS: Universal Links declared in associated domains entitlement; deep-link handlers validate the URL host against an allowlist before processing",
+        "iOS: App Extensions declare a restrictive NSExtensionAttributes payload-content-type allowlist; ShareExtension contexts validate item providers before reading",
+        "Android: deep-link handlers use App Links with android:autoVerify=\"true\"; Intent filters use specific schemes/hosts/paths, not catch-all category=android.intent.category.BROWSABLE without verification",
+        "Android: exported ContentProviders declare android:exported=\"true\" only when intentional; non-exported providers default android:exported=\"false\" (mandatory on API 31+)",
+        "Intent extras parsed with typed accessors (Bundle.getString, Bundle.getInt) and validated against expected shapes; no Intent.getSerializableExtra() for untrusted sources (CVE pattern)",
+        "security_manifest enumerates declared IPC boundaries: hostname for Universal Links / App Links, scheme for custom URL schemes, content authority for ContentProviders, extension type for App Extensions",
+        "Sensitive data NOT included in IPC payloads: no auth tokens in deep-link query params, no PII in Intent extras, no credentials in share-extension contexts"
+      ],
+      "failure_indicators": [
+        "iOS: Universal Links accepting any host without associated-domains entitlement validation — defeats the platform's domain-binding protection",
+        "iOS: AppDelegate openURL: handler that processes deep-link query params without validating host/scheme allowlist",
+        "Android: exported components (Activities, Services, BroadcastReceivers, ContentProviders) without android:permission gates — any other installed app can invoke them",
+        "Android: ContentProvider with grantUriPermissions=\"true\" without restricting which URIs are grantable — vulnerable to permission-bypass via crafted URIs",
+        "Intent extras parsed with Intent.getSerializableExtra() or Intent.getParcelableExtra(<custom Parcelable>) on untrusted input — Parcelable deserialization is a known RCE vector",
+        "Deep-link query parameters used to construct internal navigation paths without URL parsing — open-redirect vulnerability",
+        "Sensitive data passed via IPC: auth tokens in deep-link URLs (logged by intermediate routers), PII in Intent extras (logged by system logcat), session secrets in share-extension contexts",
+        "JavaScript bridges in WebViews exposed via addJavascriptInterface (Android) or messageHandlers (iOS) without origin restriction — any loaded URL can invoke native code"
+      ],
+      "false_positive_traps": [
+        "IPC handling inside test fixtures or test-only code paths (paths containing /test/, /tests/, /__tests__/, /spec/ OR functions/methods marked with @Test, @Ignore, @Disabled annotations). Test mocks legitimately stub IPC senders and receivers; these are not production violations.",
+        "Exported components with android:exported=\"true\" that handle ONLY public, non-sensitive operations (e.g., a share target that accepts text for non-authenticated post-composition) are NOT violations as long as the threat model accepts public invocation. security_manifest must declare the exposure explicitly.",
+        "Custom URL schemes for internal flows (e.g., \"myapp://oauth-redirect\") are NOT inherently violations if combined with state-parameter / PKCE validation — the violation surface is unguarded handlers, not the use of custom schemes.",
+        "ContentProvider with grantUriPermissions=\"true\" scoped to specific paths (via android:pathPattern restrictions) is the correct pattern for selective sharing — the violation surface is grantUriPermissions=\"true\" with no path restrictions.",
+        "JavaScript bridges via WKScriptMessageHandler (iOS) or addJavascriptInterface (Android) restricted to declared origins matching security_manifest.webview_discipline are NOT violations — origin restriction is the correct pattern."
+      ]
+    },
+    "interpretation_review": {
+      "interpretation_authority": "intrinsic_code_internal_review",
+      "review_status": "pre_audit",
+      "external_review_type": "none",
+      "external_reviewer": null,
+      "external_review_date": null,
+      "external_review_scope": null
+    }
+  },
+
+  "standards_body_endorsement": {
+    "endorsed": false,
+    "endorsement_authority": null,
+    "endorsement_evidence_locator": null,
+    "endorsement_evidence_sha256": null,
+    "endorsement_evidence_public_accessibility": false,
+    "endorsement_date": null,
+    "endorsement_scope": null
+  },
+
+  "claim_boundaries": {
+    "allowed_claims": [
+      "uses Constitution Pillar 5 IPC-boundary discipline (SEC-PILLAR-5-IPC-BOUNDARY) as primary evidence toward MASVS-PLATFORM-1 coverage",
+      "uses Constitution Pillar 5 screen-protection discipline (SEC-PILLAR-5-SCREEN-PROTECTION) as supporting evidence toward MASVS-PLATFORM-1 coverage on the screen-capture-as-IPC vector",
+      "uses Constitution Pillar 5 UI-integrity discipline (SEC-PILLAR-5-UI-INTEGRITY) as supporting evidence toward MASVS-PLATFORM-1 coverage on the view-isolation vector",
+      "uses Constitution Pillar 5 WebView discipline (SEC-PILLAR-5-WEBVIEW-DISCIPLINE) as supporting evidence toward MASVS-PLATFORM-1 coverage on the JavaScript-bridge-as-IPC vector",
+      "declares per-mechanism IPC boundaries in security_manifest (hostnames, schemes, content authorities, extension types) per MASVS-PLATFORM-1 platform-best-practice requirement"
+    ],
+    "softened_claims": [
+      "addresses MASVS-PLATFORM-1",
+      "aligned with MASVS-PLATFORM-1 IPC-mechanism guidance"
+    ],
+    "forbidden_claims": [],
+    "requires_external_certification": false,
+    "claim_boundary_notes": "Standard-level baseline (from manifest.json.standard_claim_policy) already covers OWASP-wide forbidden claims. No requirement-specific additions needed for MASVS-PLATFORM-1. MASVS-PLATFORM-1 is mapped to four Constitution v0.5 traces in mapping file v1.2: SEC-PILLAR-5-IPC-BOUNDARY (primary, dedicated IPC control) plus three supporting traces covering specific vectors — SCREEN-PROTECTION (screen-capture vector), UI-INTEGRITY (view-isolation vector), and WEBVIEW-DISCIPLINE (JavaScript-bridge vector). Claims about IPC security are valid only when the dedicated primary trace is implemented; supporting-trace evidence alone does not satisfy PLATFORM-1 because the dedicated IPC-BOUNDARY semantics (origin validation, typed payload unmarshalling, permission gating) are mandatory. Out of scope: IPC mechanisms the developer does not control (third-party SDK callbacks that route through their own platform-extension contexts) — those endpoints carry their own MASVS-PLATFORM-1 obligations under the third party's threat model. Tier routing handled downstream by Reaper Conclave matrix; the listed Reaper auditors consume this requirement when invoked for the bundle's tier and surface."
+  },
+
+  "intrinsic_mapping": {
+    "constitution_versions": ["0.5"],
+    "constitutional_trace_ids": [
+      "SEC-PILLAR-5-IPC-BOUNDARY",
+      "SEC-PILLAR-5-SCREEN-PROTECTION",
+      "SEC-PILLAR-5-UI-INTEGRITY",
+      "SEC-PILLAR-5-WEBVIEW-DISCIPLINE"
+    ],
+    "receipt_fields": [
+      "external_standards_summary",
+      "constitutional_traces"
+    ],
+    "auditor_consumers": [
+      "file_standards_auditor",
+      "external_standards_mapping_auditor",
+      "reaper-mobile",
+      "reaper-input"
+    ]
+  },
+
+  "lifecycle": {
+    "status": "active",
+    "supersedes": [],
+    "superseded_by": [],
+    "effective_date": "2024-01-18",
+    "withdrawn_date": null
+  },
+
+  "transcription_metadata": {
+    "corpus_version": "v0.1.0",
+    "transcribed_date": "2026-05-20"
+  }
+}
