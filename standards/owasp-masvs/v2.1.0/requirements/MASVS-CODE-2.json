@@ -1,0 +1,153 @@
+{
+  "standard_id": "MASVS-CODE-2",
+
+  "normative_source": {
+    "standard_name": "OWASP Mobile Application Security Verification Standard",
+    "standard_version": "2.1.0",
+    "standard_version_date": "2024-01-18",
+    "source_section": "MASVS-CODE: Code Quality and Build Settings — MASVS-CODE-2 (page 28)",
+    "source_locator": "https://mas.owasp.org/MASVS/controls/MASVS-CODE-2/",
+    "requirement_title": "The app has a mechanism for enforcing app updates.",
+    "normative_excerpt": "Per OWASP MASVS v2.1.0 §MASVS-CODE-2 (Description): Sometimes critical vulnerabilities are discovered in the app when it is already in production. This control ensures that there is a mechanism to force the users to update the app before they can continue using it.",
+    "normative_summary": "Mobile apps must implement a mechanism to enforce critical app updates when post-release vulnerabilities are discovered. The mechanism is typically a backend-served minimum-version check that the app consults at launch (or periodically), refusing to operate when the installed version is below the declared minimum. Platform-specific update flows (Google Play in-app updates, App Store's standard update prompts coordinated with version-blocking logic) deliver the actual update; the app's responsibility is to detect the minimum-version mismatch and gate continued usage.",
+    "verbatim_allowed": true,
+    "external_references": [
+      "https://mas.owasp.org/MASVS/controls/MASVS-CODE-2/",
+      "https://mas.owasp.org/MASVS/10-MASVS-CODE/",
+      "https://developer.android.com/guide/playcore/in-app-updates",
+      "https://developer.apple.com/app-store/"
+    ]
+  },
+
+  "source_rights": {
+    "license": "CC-BY-SA-4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "redistribution_allowed": true,
+    "public_archive_allowed": true,
+    "verbatim_excerpt_allowed": true,
+    "attribution_required": true,
+    "license_notes": "Source license recorded from the downloaded OWASP MASVS v2.1.0 PDF artifact. Live website may differ; this corpus pins the artifact license. Verbatim excerpts include attribution per CC-BY-SA-4.0 §3."
+  },
+
+  "source_integrity": {
+    "source_artifact_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
+    "transcription_input_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
+    "requirement_file_sha256": "ac3cb619af90896b0d9da2d470b13a7b6c9461f15b0f3d2d6fd152f03b5da4ce"
+  },
+
+  "applicability": {
+    "tier_floor": 1,
+    "conditions_logic": "all",
+    "conditions": [
+      {
+        "field": "security_manifest.app_tier",
+        "operator": ">=",
+        "value": 1
+      }
+    ],
+    "human_note": "Applies at Tier 1+ as a conservative corpus-level gate. Per Constitution Pillar 7 (Compliance & Last-Mile), app-update enforcement discipline activates at Tier 1+ as part of platform-store compliance baseline; the dedicated trace SEC-PILLAR-7-LAST-MILE-COMPLIANCE is a Tier 1-5 control. The blueprint schema does not currently declare a discrete update-enforcement-mechanism field as a top-level applicability filter, so security_manifest.app_tier >= 1 is used as a broad proxy. If a Tier 1+ app explicitly accepts the threat-model risk of running stale versions (e.g., a static-content reference app where no critical-update mechanism is required, an open-source app with documented exception), auditors may mark the requirement not-applicable during evidence review with documented justification in security_manifest. In practice every Intrinsic Code app at Tier 1+ requires update-enforcement because post-release critical vulnerabilities require a forcing function to update the installed base."
+  },
+
+  "intrinsic_interpretation": {
+    "interpretation_version": "1.0",
+    "mapping_strength": "direct",
+    "mapping_rationale": "Constitution Pillar 7's SEC-PILLAR-7-LAST-MILE-COMPLIANCE trace is the canonical Constitutional control for platform-store compliance requirements including app-update enforcement mechanisms. The trace explicitly covers \"app-update enforcement mechanisms where required\" alongside other store requirements (Sign in with Apple, in-app account deletion, Restore Purchases, Privacy Nutrition Label / Data Safety). MASVS-CODE-2 maps directly because platform-store update enforcement (Google Play's in-app updates API for flexible-or-immediate update flows, App Store's version-check-and-prompt patterns coordinated with backend minimum-version gating) is the canonical mechanism the control describes. The mapping is direct because the trace and the MASVS control state the same requirement at the same level of abstraction. Implementation correctness for the chosen mechanism (backend minimum-version endpoint hardening, version-check timing, fallback behavior on network failure, prevent-bypass-via-clock-manipulation, backend-validated enforcement vs client-side flag) requires auditor judgment beyond manifest declaration. The mapping is direct at the control-statement level, but the auditor evaluation chain (file_standards_auditor + reaper-mobile + reaper-compliance) is necessary for full evaluation of correctness.",
+    "verification_guidance": {
+      "evidence_locator_types": [
+        "symbol_pattern",
+        "config_pattern",
+        "manifest_entry",
+        "dependency_declaration"
+      ],
+      "expected_evidence_patterns": [
+        "Android: Google Play in-app updates integration via com.google.android.play:app-update dependency; AppUpdateManager.appUpdateInfo consulted at launch; IMMEDIATE update flow for security-critical versions, FLEXIBLE for non-critical",
+        "iOS: backend-served minimum-version endpoint consulted at launch (and periodically for long-lived sessions); current installed version compared against the minimum; UI blocks continued usage with an App Store link if installed < minimum",
+        "Backend minimum-version endpoint is HTTPS-only, returns a signed (or HMAC-authenticated) response to prevent MITM downgrade — defeats attackers who would otherwise spoof a low minimum-version",
+        "Update-enforcement logic uses backend-authoritative version, not local-stored value — local cache cannot extend the grace period via timestamp manipulation",
+        "Version check tolerates short network outages with declared grace period (declared in security_manifest), but does NOT fail-open indefinitely — extended unavailability triggers offline-degraded posture, not bypass",
+        "security_manifest declares update-enforcement strategy: which versions are critical (require immediate update), which are recommended (allow flexible update), and the maximum tolerated stale-version-grace window before forced upgrade",
+        "Critical-update version bumps coordinated with version-blocking deploy — when a critical version is published to the store, the backend minimum-version is bumped to enforce the upgrade"
+      ],
+      "failure_indicators": [
+        "No update-enforcement mechanism at all — app launches at any installed version with no minimum-version check; post-release critical vulnerabilities cannot be remediated for the installed base",
+        "Update prompt that can be permanently dismissed without enforcement — user clicks \"later\" and continues using the vulnerable version indefinitely; not enforcement",
+        "Version check using only client-stored / hardcoded minimum-version — attackers patch the binary to lower the threshold, defeating the gate",
+        "Version check via HTTP (not HTTPS) — MITM downgrade attack returns a low minimum-version, bypassing enforcement",
+        "Version check that fails open on network errors — attacker blocks the version-check endpoint to bypass enforcement (combine with offline detection + degraded-posture policy)",
+        "Update enforcement that can be bypassed via uninstall/reinstall to an older APK/IPA from third-party sources — needs account-level enforcement (server refuses authenticated requests from old client versions) in addition to client-side gating",
+        "Update enforcement triggered only on cold launch, not on resume — long-lived sessions skip the version check after initial launch",
+        "No declared coordination between store-version publication and backend-minimum-version-bump — operational gap where backend doesn't know to enforce after store publishes the patched version"
+      ],
+      "false_positive_traps": [
+        "Update-enforcement handling inside test fixtures or test-only code paths (paths containing /test/, /tests/, /__tests__/, /spec/ OR functions/methods marked with @Test, @Ignore, @Disabled annotations). Test mocks legitimately stub version checks; these are not production violations.",
+        "Static-content apps with no critical-vulnerability surface (e.g., a publicly-shared reference document app with no user data) are NOT MASVS-CODE-2 violations if security_manifest explicitly declares the no-critical-update posture; the violation surface is undeclared lack-of-enforcement, not declared.",
+        "Soft-prompt updates (suggesting update without forcing) for non-critical versions are NOT violations as long as critical-version enforcement is hard — soft-prompt-for-nice-to-have + hard-block-for-critical is the recommended Google Play in-app updates pattern.",
+        "Apps distributed only via enterprise MDM with centralized update enforcement (e.g., Apple Business Manager / Android Enterprise managed configurations) may have minimal in-app update gating because the MDM channel enforces — security_manifest must declare the MDM-managed distribution posture.",
+        "Update-enforcement that operates on session expiry rather than launch (e.g., \"upgrade required at next login\" with periodic token refresh that re-validates version) is NOT a violation — different mechanism, same enforcement guarantee."
+      ]
+    },
+    "interpretation_review": {
+      "interpretation_authority": "intrinsic_code_internal_review",
+      "review_status": "pre_audit",
+      "external_review_type": "none",
+      "external_reviewer": null,
+      "external_review_date": null,
+      "external_review_scope": null
+    }
+  },
+
+  "standards_body_endorsement": {
+    "endorsed": false,
+    "endorsement_authority": null,
+    "endorsement_evidence_locator": null,
+    "endorsement_evidence_sha256": null,
+    "endorsement_evidence_public_accessibility": false,
+    "endorsement_date": null,
+    "endorsement_scope": null
+  },
+
+  "claim_boundaries": {
+    "allowed_claims": [
+      "uses Constitution Pillar 7 last-mile-compliance discipline (SEC-PILLAR-7-LAST-MILE-COMPLIANCE) as primary evidence toward MASVS-CODE-2 coverage on the app-update-enforcement vector",
+      "declares update-enforcement strategy in security_manifest (critical-version policy, grace-window, backend minimum-version endpoint) per MASVS-CODE-2 platform-best-practice requirement",
+      "enforces critical-update versions via backend-authoritative minimum-version check with HTTPS / signed-response protections against MITM downgrade"
+    ],
+    "softened_claims": [
+      "addresses MASVS-CODE-2",
+      "aligned with MASVS-CODE-2 update-enforcement guidance"
+    ],
+    "forbidden_claims": [],
+    "requires_external_certification": false,
+    "claim_boundary_notes": "Standard-level baseline (from manifest.json.standard_claim_policy) already covers OWASP-wide forbidden claims. No requirement-specific additions needed for MASVS-CODE-2. MASVS-CODE-2 is mapped to one Constitution v0.5 trace in mapping file v1.2: SEC-PILLAR-7-LAST-MILE-COMPLIANCE (primary, direct). The mapping is direct because the trace explicitly includes app-update enforcement among its platform-store compliance scope items. Claims about update-enforcement effectiveness depend on the chosen mechanism — backend-authoritative-minimum-version claims require signed-response or HTTPS-only verification; account-level-enforcement claims require server-side version rejection on authenticated calls; coordination claims require declared operational handoff between store-publish and backend-version-bump. Out of scope: end-user devices that don't update due to platform-level constraints (low storage, unmetered-network unavailability, parental restrictions) — the app cannot control these conditions, only the enforcement gate on continued usage. Tier routing handled downstream by Reaper Conclave matrix; the listed Reaper auditors consume this requirement when invoked for the bundle's tier and surface."
+  },
+
+  "intrinsic_mapping": {
+    "constitution_versions": ["0.5"],
+    "constitutional_trace_ids": [
+      "SEC-PILLAR-7-LAST-MILE-COMPLIANCE"
+    ],
+    "receipt_fields": [
+      "external_standards_summary",
+      "constitutional_traces"
+    ],
+    "auditor_consumers": [
+      "file_standards_auditor",
+      "external_standards_mapping_auditor",
+      "reaper-mobile",
+      "reaper-compliance"
+    ]
+  },
+
+  "lifecycle": {
+    "status": "active",
+    "supersedes": [],
+    "superseded_by": [],
+    "effective_date": "2024-01-18",
+    "withdrawn_date": null
+  },
+
+  "transcription_metadata": {
+    "corpus_version": "v0.1.0",
+    "transcribed_date": "2026-05-20"
+  }
+}

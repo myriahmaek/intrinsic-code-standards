@@ -1,0 +1,151 @@
+{
+  "standard_id": "MASVS-CODE-1",
+
+  "normative_source": {
+    "standard_name": "OWASP Mobile Application Security Verification Standard",
+    "standard_version": "2.1.0",
+    "standard_version_date": "2024-01-18",
+    "source_section": "MASVS-CODE: Code Quality and Build Settings — MASVS-CODE-1 (page 28)",
+    "source_locator": "https://mas.owasp.org/MASVS/controls/MASVS-CODE-1/",
+    "requirement_title": "The app requires an up-to-date platform version.",
+    "normative_excerpt": "Per OWASP MASVS v2.1.0 §MASVS-CODE-1 (Description): Every release of the mobile OS includes security patches and new security features. By supporting older versions, apps stay vulnerable to well-known threats. This control ensures that the app is running on an up-to-date platform version so that users have the latest security protections.",
+    "normative_summary": "Mobile apps must declare and enforce a minimum platform OS version (iOS deployment target, Android minSdkVersion) that is at or above the version required for all declared platform-secure mechanisms — secure storage APIs, biometric authentication frameworks, network security defaults, sandbox features, and runtime protections. Supporting older OS versions exposes the app to known platform-level vulnerabilities patched in newer releases; the minimum-version floor is a build-time gate against this exposure.",
+    "verbatim_allowed": true,
+    "external_references": [
+      "https://mas.owasp.org/MASVS/controls/MASVS-CODE-1/",
+      "https://mas.owasp.org/MASVS/10-MASVS-CODE/",
+      "https://developer.apple.com/documentation/xcode/configuring-the-build-settings-of-a-new-project",
+      "https://developer.android.com/build/configure-app-module"
+    ]
+  },
+
+  "source_rights": {
+    "license": "CC-BY-SA-4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "redistribution_allowed": true,
+    "public_archive_allowed": true,
+    "verbatim_excerpt_allowed": true,
+    "attribution_required": true,
+    "license_notes": "Source license recorded from the downloaded OWASP MASVS v2.1.0 PDF artifact. Live website may differ; this corpus pins the artifact license. Verbatim excerpts include attribution per CC-BY-SA-4.0 §3."
+  },
+
+  "source_integrity": {
+    "source_artifact_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
+    "transcription_input_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
+    "requirement_file_sha256": "6c19977b7445191bfdb2b955e8b3412b4785a56b2a1edb5cc3058c003107d280"
+  },
+
+  "applicability": {
+    "tier_floor": 1,
+    "conditions_logic": "all",
+    "conditions": [
+      {
+        "field": "security_manifest.app_tier",
+        "operator": ">=",
+        "value": 1
+      }
+    ],
+    "human_note": "Applies at Tier 1+ as a conservative corpus-level gate. Per Constitution Pillar 3 (Cryptography & Key Material), platform version floor discipline is universal — the dedicated trace SEC-PILLAR-3-PLATFORM-VERSION-FLOOR (new in Constitution v0.5) is a Tier 1-5 control because every app declares a minimum OS version regardless of tier. The Constitution v0.5 trace definition references a `security_manifest.minimum_platform_version` declaration that is not yet a dedicated field in the blueprint schema; current applicability uses `security_manifest.app_tier >= 1` as proxy, and evidence flows through build-setting surfaces (iOS IPHONEOS_DEPLOYMENT_TARGET, Android minSdkVersion). A future schema enhancement (banked) will add the dedicated minimum_platform_version field. In practice every Intrinsic Code app at Tier 1+ requires a declared minimum-version floor because secure storage APIs, biometric frameworks, and network defaults all carry per-OS-version availability matrices that the floor enforces against."
+  },
+
+  "intrinsic_interpretation": {
+    "interpretation_version": "1.0",
+    "mapping_strength": "direct",
+    "mapping_rationale": "Constitution Pillar 3's SEC-PILLAR-3-PLATFORM-VERSION-FLOOR trace was added in v0.5 specifically to provide a 1:1 mapping to MASVS-CODE-1. The trace requires the manifest to declare a minimum platform OS version, with the floor enforced to be at or above the version required for all declared platform-secure primitives, secure storage APIs, and runtime protections — and builds targeting a platform version below the declared floor are rejected at blueprint validation. This directly implements MASVS-CODE-1's requirement that the app require an up-to-date platform version. The mapping is direct because the trace and the MASVS control state the same requirement. Implementation correctness for the chosen floor (auditing the declared minimum against currently-supported OS levels at build time, validating against the platform-primitives the manifest declares, recurring re-evaluation on platform vendor end-of-life announcements) requires auditor judgment beyond manifest declaration. The mapping is direct at the control-statement level, but the auditor evaluation chain (file_standards_auditor + reaper-mobile + reaper-dependencies) is necessary for full evaluation of correctness.",
+    "verification_guidance": {
+      "evidence_locator_types": [
+        "symbol_pattern",
+        "config_pattern",
+        "manifest_entry",
+        "dependency_declaration"
+      ],
+      "expected_evidence_patterns": [
+        "iOS: Xcode project declares IPHONEOS_DEPLOYMENT_TARGET at a value matching or exceeding the declared minimum platform version in the blueprint",
+        "iOS: Info.plist's MinimumOSVersion (set by Xcode from deployment target) matches the declared floor; build fails if mismatched",
+        "Android: app's build.gradle declares minSdkVersion (or minSdk) at a value matching or exceeding the declared minimum platform version in the blueprint",
+        "Android: AndroidManifest.xml's <uses-sdk android:minSdkVersion=\"N\"> matches the declared floor; build fails if mismatched",
+        "Build configurations on both platforms align with the blueprint's declared minimum (currently captured via PIPELINE_LANGUAGE tier-floor conventions and blueprint-validation; future schema field security_manifest.minimum_platform_version will formalize the per-platform declaration)",
+        "Floor declared at or above the version required for the most-restrictive platform-secure mechanism the app uses (e.g., if app uses CryptoKit which requires iOS 13+, floor must be >= 13; if app uses BiometricPrompt strong-class which requires API 28+, floor must be >= 28); auditor cross-references the blueprint's declared minimum against the security_manifest's declared primitives, not against a non-existent minimum_platform_version field",
+        "Floor re-evaluation logged on platform vendor end-of-life announcements (Apple security update support windows, Google Android version support cycles)"
+      ],
+      "failure_indicators": [
+        "iOS: IPHONEOS_DEPLOYMENT_TARGET set below currently-supported iOS versions (Apple supports the previous two major versions for security updates; targeting iOS versions outside this window exposes the app to unpatched OS-level vulnerabilities)",
+        "Android: minSdkVersion set to a value below Google's current security-patch support window (typically the most recent ~3 major API levels); targeting older API levels exposes the app to known platform vulnerabilities",
+        "Floor mismatched against declared platform-secure primitives — e.g., security_manifest declares use of CryptoKit but the blueprint's effective minimum platform version is iOS 12 (CryptoKit requires iOS 13)",
+        "No declared minimum platform version in the blueprint (whether via dedicated schema field where one exists or via constitution_traces[] referencing SEC-PILLAR-3-PLATFORM-VERSION-FLOOR with target version) — blueprint validation should reject this; if it doesn't, the LOAD-time gate is bypassed",
+        "Build pipeline allows targeting platform versions below the declared floor — the floor is documented but not enforced (declared-but-not-enforced is a violation per Constitution's blueprint-validation requirement)",
+        "Apps that ship to multiple platforms with one platform's floor below the secure-mechanism requirement on that platform (e.g., security_manifest declares biometric strong-class on Android but minSdk is below the API level supporting it)"
+      ],
+      "false_positive_traps": [
+        "Platform-version handling inside test fixtures or test-only code paths (paths containing /test/, /tests/, /__tests__/, /spec/ OR functions/methods marked with @Test, @Ignore, @Disabled annotations). Test environments may legitimately use older API simulators for compatibility coverage; these are not production violations.",
+        "Apps that intentionally target a wider audience (e.g., consumer apps where the threat model accepts the risk of supporting last-gen devices with documented compensating controls) are NOT violations if the threat model explicitly accepts this and the security_manifest documents the accepted-risk posture with end-of-life timeline.",
+        "Long-tail enterprise apps targeting specific corporate-managed device fleets with documented OS-version lock-in are NOT violations as long as security_manifest declares the fleet-specific platform-floor posture; the violation surface is undeclared older-platform support, not declared.",
+        "Beta / TestFlight / internal-distribution builds with broader target ranges for compatibility testing are NOT violations if production builds enforce the declared floor — security_manifest must declare the build-variant scoping.",
+        "Apps that intentionally support an older platform for one specific feature (e.g., legacy device sensor access required for compatibility) are NOT violations if security_manifest scopes the floor exception to the specific feature and applies the standard floor everywhere else."
+      ]
+    },
+    "interpretation_review": {
+      "interpretation_authority": "intrinsic_code_internal_review",
+      "review_status": "pre_audit",
+      "external_review_type": "none",
+      "external_reviewer": null,
+      "external_review_date": null,
+      "external_review_scope": null
+    }
+  },
+
+  "standards_body_endorsement": {
+    "endorsed": false,
+    "endorsement_authority": null,
+    "endorsement_evidence_locator": null,
+    "endorsement_evidence_sha256": null,
+    "endorsement_evidence_public_accessibility": false,
+    "endorsement_date": null,
+    "endorsement_scope": null
+  },
+
+  "claim_boundaries": {
+    "allowed_claims": [
+      "uses Constitution Pillar 3 platform-version-floor discipline (SEC-PILLAR-3-PLATFORM-VERSION-FLOOR) as primary evidence toward MASVS-CODE-1 coverage",
+      "declares minimum platform OS version via build-setting surfaces (iOS IPHONEOS_DEPLOYMENT_TARGET, Android minSdkVersion) and blueprint-validation enforcement per MASVS-CODE-1 platform-best-practice requirement; future schema enhancement (banked) adds a dedicated security_manifest.minimum_platform_version field",
+      "enforces minimum-version floor at blueprint validation — builds targeting platform versions below the declared floor are rejected before code generation"
+    ],
+    "softened_claims": [
+      "addresses MASVS-CODE-1",
+      "aligned with MASVS-CODE-1 platform-version guidance"
+    ],
+    "forbidden_claims": [],
+    "requires_external_certification": false,
+    "claim_boundary_notes": "Standard-level baseline (from manifest.json.standard_claim_policy) already covers OWASP-wide forbidden claims. No requirement-specific additions needed for MASVS-CODE-1. MASVS-CODE-1 is mapped to one Constitution v0.5 trace in mapping file v1.2: SEC-PILLAR-3-PLATFORM-VERSION-FLOOR (primary, direct). The trace was added in v0.5 specifically to provide a 1:1 mapping to CODE-1, so the mapping is direct rather than partial. Claims about platform-version security depend on the floor being aligned with currently-supported OS levels — declaring a floor below the OS vendor's security-update support window does not satisfy CODE-1 even though a floor is technically declared. Out of scope: OS-vendor patch deployment to end-user devices (Apple/Google control this, not the app); apps cannot force end-users onto patched OS versions, only enforce a minimum-version-floor at install/launch via platform store mechanisms. Tier routing handled downstream by Reaper Conclave matrix; the listed Reaper auditors consume this requirement when invoked for the bundle's tier and surface."
+  },
+
+  "intrinsic_mapping": {
+    "constitution_versions": ["0.5"],
+    "constitutional_trace_ids": [
+      "SEC-PILLAR-3-PLATFORM-VERSION-FLOOR"
+    ],
+    "receipt_fields": [
+      "external_standards_summary",
+      "constitutional_traces"
+    ],
+    "auditor_consumers": [
+      "file_standards_auditor",
+      "external_standards_mapping_auditor",
+      "reaper-mobile",
+      "reaper-dependencies"
+    ]
+  },
+
+  "lifecycle": {
+    "status": "active",
+    "supersedes": [],
+    "superseded_by": [],
+    "effective_date": "2024-01-18",
+    "withdrawn_date": null
+  },
+
+  "transcription_metadata": {
+    "corpus_version": "v0.1.0",
+    "transcribed_date": "2026-05-20"
+  }
+}

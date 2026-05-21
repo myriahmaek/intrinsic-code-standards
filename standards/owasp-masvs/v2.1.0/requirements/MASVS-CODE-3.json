@@ -1,0 +1,153 @@
+{
+  "standard_id": "MASVS-CODE-3",
+
+  "normative_source": {
+    "standard_name": "OWASP Mobile Application Security Verification Standard",
+    "standard_version": "2.1.0",
+    "standard_version_date": "2024-01-18",
+    "source_section": "MASVS-CODE: Code Quality and Build Settings — MASVS-CODE-3 (page 28)",
+    "source_locator": "https://mas.owasp.org/MASVS/controls/MASVS-CODE-3/",
+    "requirement_title": "The app only uses software components without known vulnerabilities.",
+    "normative_excerpt": "Per OWASP MASVS v2.1.0 §MASVS-CODE-3 (Description): To be truly secure, a full whitebox assessment should have been performed on all app components. However, as it usually happens with e.g. for third-party components this is not always feasible and not typically part of a penetration test. This control covers \"low-hanging fruit\" cases, such as those that can be detected just by scanning libraries for known vulnerabilities.",
+    "normative_summary": "Mobile apps must avoid shipping software components (third-party libraries, SDKs, native dependencies) with publicly-disclosed vulnerabilities. The control covers the detectable-by-scanning subset: components with CVEs in the National Vulnerability Database (NVD), OSV (Open Source Vulnerabilities), GitHub Security Advisories, or vendor-published advisories. Detection happens via dependency-scanning tools (Snyk, Dependabot, OWASP Dependency-Check, Trivy) at build time and ongoing. The control does NOT require full whitebox audit of all components — it explicitly carves out the broader audit as out of scope for routine compliance.",
+    "verbatim_allowed": true,
+    "external_references": [
+      "https://mas.owasp.org/MASVS/controls/MASVS-CODE-3/",
+      "https://mas.owasp.org/MASVS/10-MASVS-CODE/",
+      "https://nvd.nist.gov/",
+      "https://osv.dev/"
+    ]
+  },
+
+  "source_rights": {
+    "license": "CC-BY-SA-4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "redistribution_allowed": true,
+    "public_archive_allowed": true,
+    "verbatim_excerpt_allowed": true,
+    "attribution_required": true,
+    "license_notes": "Source license recorded from the downloaded OWASP MASVS v2.1.0 PDF artifact. Live website may differ; this corpus pins the artifact license. Verbatim excerpts include attribution per CC-BY-SA-4.0 §3."
+  },
+
+  "source_integrity": {
+    "source_artifact_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
+    "transcription_input_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
+    "requirement_file_sha256": "20a6aaee145e2806157200e9331139601b6e99c611220d72961e7f19295db8df"
+  },
+
+  "applicability": {
+    "tier_floor": 1,
+    "conditions_logic": "all",
+    "conditions": [
+      {
+        "field": "security_manifest.app_tier",
+        "operator": ">=",
+        "value": 1
+      }
+    ],
+    "human_note": "Applies at Tier 1+ as a conservative corpus-level gate. Per Constitution Pillar 3 (Cryptography & Key Material), dependency hygiene activates at Tier 1+; SEC-PILLAR-3-DEPENDENCY-PINNING is a Tier 1-5 control while SEC-PILLAR-3-SDK-PROVENANCE is Tier 3-5 (vendor security history review). The blueprint schema declares sdk_provenance (per Constitution v0.5); the broader dependency_pinning field referenced in the Constitution definition is not yet a dedicated schema field, so current evidence flows through package manifests (Podfile, Package.swift, build.gradle), committed lockfiles (Package.resolved, Podfile.lock, gradle.lockfile), reachability_notes, and dependency-scan tool outputs. A future schema enhancement (banked) will add dedicated dependency_pinning and dependency_vulnerability_scan_policy fields. The tier-1 applicability floor is honest because every modern mobile app ships third-party dependencies that may carry disclosed vulnerabilities; provenance review at Tier 3+ adds the vendor-history dimension. In practice every Intrinsic Code app at Tier 1+ requires dependency vulnerability scanning because Node modules, Pods, Gradle dependencies, and SwiftPM packages all carry potential CVE exposure."
+  },
+
+  "intrinsic_interpretation": {
+    "interpretation_version": "1.0",
+    "mapping_strength": "partial",
+    "mapping_rationale": "Constitution Pillar 3 covers MASVS-CODE-3 via two supporting traces with no single dedicated primary — SEC-PILLAR-3-DEPENDENCY-PINNING (supporting, dependency version pinning + reachability analysis) and SEC-PILLAR-3-SDK-PROVENANCE (supporting, provider security history and maintenance-status review). Neither trace alone is THE control for \"libraries without known vulnerabilities\" by name and substance — DEPENDENCY-PINNING is about version-locking and reachability, SDK-PROVENANCE is about vendor evaluation — but together they substantively cover the MASVS-CODE-3 surface: pinned versions enable precise CVE tracking against the actually-shipped versions, and provenance review catches the case where a vendor's CVE history makes ongoing CVE risk likely. Both labeled supporting in mapping file v1.2 because Constitution distributes the coverage across two Pillar 3 controls rather than concentrating in one dedicated trace. The mapping is partial because no single Constitution trace is dedicated 1:1; the two-trace distributed coverage substantively addresses the MASVS-CODE-3 scope. Implementation correctness for the chosen mechanisms (dependency-scanning tool integration, reachability-analysis configuration to suppress unreachable-vuln noise, vendor security-history evaluation cadence, response-policy for newly-disclosed CVEs in shipping components) requires auditor judgment beyond manifest declaration.",
+    "verification_guidance": {
+      "evidence_locator_types": [
+        "symbol_pattern",
+        "config_pattern",
+        "manifest_entry",
+        "dependency_declaration"
+      ],
+      "expected_evidence_patterns": [
+        "Dependency-scanning tool integrated in CI pipeline — Snyk, Dependabot, OWASP Dependency-Check, Trivy, or equivalent; scan blocks merge on disclosed CVEs above declared severity threshold",
+        "iOS: Podfile and Package.swift declare versions either as exact strings or as ranges paired with a committed Package.resolved / Podfile.lock that captures the resolved version graph; vulnerability scanning evaluates the resolved shipped versions, not the declared range",
+        "Android: build.gradle declares versions either as exact strings or as ranges paired with a committed gradle.lockfile capturing the resolved version graph; vulnerability scanning evaluates the resolved shipped versions",
+        "Reachability analysis configured to distinguish unreachable-but-flagged vs reachable-and-exploitable CVE matches — suppresses noise from vulnerabilities in code paths the app does not execute",
+        "Pinning strategy declared via package-manager configuration: exact-version pinning OR range-with-committed-lockfile (Package.resolved on iOS Swift PM, Podfile.lock on iOS CocoaPods, gradle.lockfile on Android Gradle); tooling (Renovate, Dependabot) configuration drives auto-update of pinned versions; future schema field security_manifest.dependency_pinning (banked) will formalize the policy declaration",
+        "security_manifest.sdk_provenance declares per-SDK evaluation: vendor security history, maintenance status (last commit, last release, response time to disclosed CVEs), ownership, reputation; re-evaluation triggered on provider acquisition, ownership change, or unaddressed CVE",
+        "Build pipeline rejects builds with disclosed CVEs above declared severity threshold and no documented exception; exception requires reachability-analysis evidence or compensating-control declaration"
+      ],
+      "failure_indicators": [
+        "No dependency-scanning in build pipeline — CVE-affected versions ship without detection until external disclosure pressure",
+        "Unpinned dependencies WITHOUT committed lockfile — Gradle `+` notation without gradle.lockfile, Pod `~>` ranges without Podfile.lock committed, SwiftPM `branch:` references without Package.resolved committed — could resolve to vulnerable versions on subsequent builds without code changes and without scan-on-resolved-version coverage",
+        "Pinned dependencies to versions with known CVEs (NVD-listed, OSV-listed, GitHub Advisory) and no documented exception in security_manifest — pinning without CVE review defeats the control",
+        "Dependency-scanning configured but warnings ignored — CVE matches above declared severity surface without blocking merge or triggering remediation",
+        "SDK from unmaintained vendor (no commits or releases in 18+ months) without reachability analysis or compensating-control declaration — provenance signal indicates likely-unpatched-future-CVE",
+        "Vendor acquired by entity with poor security track record without provenance re-evaluation — Constitution v0.5 explicitly requires re-evaluation on provider acquisition / ownership change",
+        "Transitive-dependency CVEs ignored — direct dependencies pinned but transitive resolution allows vulnerable indirect dependencies through; needs full-dependency-tree analysis"
+      ],
+      "false_positive_traps": [
+        "Dependency handling inside test fixtures or test-only code paths (paths containing /test/, /tests/, /__tests__/, /spec/ OR functions/methods marked with @Test, @Ignore, @Disabled annotations). Dev/test dependencies (Jest, JUnit, mockK, XCTest) are not shipped to production; CVEs in these are not MASVS-CODE-3 violations even when scanners flag them.",
+        "CVEs in code paths verified unreachable via reachability analysis (Snyk Code, GitHub CodeQL, or equivalent) are NOT violations as long as security_manifest documents the reachability assertion and re-runs analysis on dependency or code changes — per Constitution's \"reachability analysis required\" clause.",
+        "Build-time-only dependencies (lint tools, code generators, build plugins not shipped in the binary) are NOT subject to MASVS-CODE-3 even when scanners flag them — security_manifest can declare the build-time-only scope.",
+        "Dependencies with CVEs disclosed AFTER the last build but BEFORE the next release window are NOT violations if security_manifest declares the response-policy SLA (e.g., \"critical CVEs trigger hotfix within 72 hours; high CVEs within 7 days\") and the response-policy is being followed.",
+        "Vulnerabilities in OS-bundled libraries (system libraries the app does not ship) are NOT MASVS-CODE-3 violations — they fall under MASVS-CODE-1 (platform version floor) instead. Distinct control scope."
+      ]
+    },
+    "interpretation_review": {
+      "interpretation_authority": "intrinsic_code_internal_review",
+      "review_status": "pre_audit",
+      "external_review_type": "none",
+      "external_reviewer": null,
+      "external_review_date": null,
+      "external_review_scope": null
+    }
+  },
+
+  "standards_body_endorsement": {
+    "endorsed": false,
+    "endorsement_authority": null,
+    "endorsement_evidence_locator": null,
+    "endorsement_evidence_sha256": null,
+    "endorsement_evidence_public_accessibility": false,
+    "endorsement_date": null,
+    "endorsement_scope": null
+  },
+
+  "claim_boundaries": {
+    "allowed_claims": [
+      "uses Constitution Pillar 3 dependency-pinning discipline (SEC-PILLAR-3-DEPENDENCY-PINNING) as supporting evidence toward MASVS-CODE-3 coverage on the version-tracking-and-reachability vector",
+      "uses Constitution Pillar 3 SDK-provenance discipline (SEC-PILLAR-3-SDK-PROVENANCE) as supporting evidence toward MASVS-CODE-3 coverage on the vendor-history-and-maintenance-status vector",
+      "declares dependency hygiene via package manifests, committed lockfiles, security_manifest.sdk_provenance, reachability_notes, and dependency-scan tool integration per MASVS-CODE-3 platform-best-practice requirement; future schema enhancement (banked) adds dedicated dependency_pinning and dependency_vulnerability_scan_policy fields",
+      "scans shipping dependencies against NVD / OSV / GitHub Advisory databases at build time with declared severity-threshold blocking"
+    ],
+    "softened_claims": [
+      "addresses MASVS-CODE-3",
+      "aligned with MASVS-CODE-3 third-party-component guidance"
+    ],
+    "forbidden_claims": [],
+    "requires_external_certification": false,
+    "claim_boundary_notes": "Standard-level baseline (from manifest.json.standard_claim_policy) already covers OWASP-wide forbidden claims. No requirement-specific additions needed for MASVS-CODE-3. MASVS-CODE-3 is mapped to two Constitution v0.5 traces in mapping file v1.2: SEC-PILLAR-3-DEPENDENCY-PINNING (supporting, version-tracking-and-reachability layer) and SEC-PILLAR-3-SDK-PROVENANCE (supporting, vendor-history layer). Both are labeled supporting because no single Constitution trace is dedicated 1:1 to MASVS-CODE-3 — Pillar 3 distributes the coverage across two Pillar 3 controls. The partial-mapping label is honest about this. Claims about known-vulnerability coverage are scoped — they apply only to the scanner databases consulted (NVD / OSV / GitHub Advisory or others as declared), the severity thresholds enforced, the resolved dependency graph at scan time, the reachability rules applied, and the scan-time snapshot; claims do NOT extend to undisclosed-zero-day vulnerabilities, post-scan-window disclosures, undeclared scanner-database gaps, or full-whitebox-audit completeness. MASVS-CODE-3 explicitly scopes to \"low-hanging fruit\" scanner-detectable vulnerabilities. Out of scope: OS-bundled library CVEs (covered by MASVS-CODE-1 platform-version-floor), build-time-only tooling CVEs (not shipped), and reachability-analysis-suppressed unreachable findings (require documented analysis re-runs on code changes). Tier routing handled downstream by Reaper Conclave matrix; the listed Reaper auditors consume this requirement when invoked for the bundle's tier and surface."
+  },
+
+  "intrinsic_mapping": {
+    "constitution_versions": ["0.5"],
+    "constitutional_trace_ids": [
+      "SEC-PILLAR-3-DEPENDENCY-PINNING",
+      "SEC-PILLAR-3-SDK-PROVENANCE"
+    ],
+    "receipt_fields": [
+      "external_standards_summary",
+      "constitutional_traces"
+    ],
+    "auditor_consumers": [
+      "file_standards_auditor",
+      "external_standards_mapping_auditor",
+      "reaper-dependencies"
+    ]
+  },
+
+  "lifecycle": {
+    "status": "active",
+    "supersedes": [],
+    "superseded_by": [],
+    "effective_date": "2024-01-18",
+    "withdrawn_date": null
+  },
+
+  "transcription_metadata": {
+    "corpus_version": "v0.1.0",
+    "transcribed_date": "2026-05-20"
+  }
+}
