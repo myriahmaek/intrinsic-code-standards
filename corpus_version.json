@@ -15,7 +15,7 @@
       "status": "active",
       "current_version": "2.1.0",
       "verified_at": "2026-05-18",
-      "reason": "MASVS v2.1.0 active in corpus v0.1.0. Batches 1-4 of 8 committed (CRYPTO-1, STORAGE-1, STORAGE-2, CRYPTO-2, AUTH-1, NETWORK-1, CODE-4, AUTH-2, AUTH-3, NETWORK-2, PLATFORM-1, PLATFORM-2, PLATFORM-3); remaining 11 requirements pending Batches 5-8."
+      "reason": "MASVS v2.1.0 active in corpus v0.1.0. Batches 1-5 of 8 committed (CRYPTO-1, STORAGE-1, STORAGE-2, CRYPTO-2, AUTH-1, NETWORK-1, CODE-4, AUTH-2, AUTH-3, NETWORK-2, PLATFORM-1, PLATFORM-2, PLATFORM-3, RESILIENCE-1, RESILIENCE-2, RESILIENCE-3); remaining 8 requirements pending Batches 6-8."
     },
     "NIST-800-63": {
       "status": "not_transcribed",

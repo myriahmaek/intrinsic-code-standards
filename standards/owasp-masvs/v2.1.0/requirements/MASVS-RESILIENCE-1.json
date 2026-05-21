@@ -1,0 +1,151 @@
+{
+  "standard_id": "MASVS-RESILIENCE-1",
+
+  "normative_source": {
+    "standard_name": "OWASP Mobile Application Security Verification Standard",
+    "standard_version": "2.1.0",
+    "standard_version_date": "2024-01-18",
+    "source_section": "MASVS-RESILIENCE: Resilience Against Reverse Engineering and Tampering — MASVS-RESILIENCE-1 (page 31)",
+    "source_locator": "https://mas.owasp.org/MASVS/controls/MASVS-RESILIENCE-1/",
+    "requirement_title": "The app validates the integrity of the platform.",
+    "normative_excerpt": "Per OWASP MASVS v2.1.0 §MASVS-RESILIENCE-1 (Description): Running on a platform that has been tampered with can be very dangerous for apps, as this may disable certain security features, putting the data of the app at risk. Trusting the platform is essential for many of the MASVS controls relying on the platform being secure (e.g. secure storage, biometrics, sandboxing, etc.). This control tries to validate that the OS has not been compromised and its security features can thus be trusted.",
+    "normative_summary": "Mobile apps must validate that the platform (OS) they run on has not been tampered with — jailbroken on iOS, rooted on Android, or otherwise compromised in ways that disable security features the app depends on (Keychain, biometrics, sandbox). Validation can be done via on-device heuristic checks (jailbreak/root detection libraries and platform indicators) and/or via platform-provided cryptographic attestation services — Google Play Integrity (device, app, and account-details verdicts verifiable by the app's backend) and Apple App Attest (app instance integrity and request legitimacy attestations, which strengthen platform-trust evidence but do not fully substitute for local jailbreak/platform-tamper detection on iOS).",
+    "verbatim_allowed": true,
+    "external_references": [
+      "https://mas.owasp.org/MASVS/controls/MASVS-RESILIENCE-1/",
+      "https://mas.owasp.org/MASVS/09-MASVS-RESILIENCE/",
+      "https://developer.apple.com/documentation/devicecheck/establishing-your-app-s-integrity",
+      "https://developer.android.com/google/play/integrity"
+    ]
+  },
+
+  "source_rights": {
+    "license": "CC-BY-SA-4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "redistribution_allowed": true,
+    "public_archive_allowed": true,
+    "verbatim_excerpt_allowed": true,
+    "attribution_required": true,
+    "license_notes": "Source license recorded from the downloaded OWASP MASVS v2.1.0 PDF artifact. Live website may differ; this corpus pins the artifact license. Verbatim excerpts include attribution per CC-BY-SA-4.0 §3."
+  },
+
+  "source_integrity": {
+    "source_artifact_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
+    "transcription_input_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
+    "requirement_file_sha256": "547e7701a6fc3ab7d7a6b73aaa165af5f78d95b9c119ff82c5f8d25ed32d7d9e"
+  },
+
+  "applicability": {
+    "tier_floor": 3,
+    "conditions_logic": "all",
+    "conditions": [
+      {
+        "field": "security_manifest.app_tier",
+        "operator": ">=",
+        "value": 3
+      }
+    ],
+    "human_note": "Applies at Tier 3+ as a conservative corpus-level gate. Per Constitution Pillar 5 (Secure Architecture & Runtime), platform integrity validation activates at Tier 3+ where the app handles user authentication and private user-to-user content; both Constitution traces (SEC-PILLAR-5-JAILBREAK-DETECTION and SEC-PILLAR-5-PLATFORM-ATTESTATION) are Tier 3-5 controls. The blueprint schema does not currently declare a discrete platform-integrity-required field, so security_manifest.app_tier >= 3 is used as a broad proxy. If a Tier 3+ app explicitly accepts the threat-model risk of running on tampered platforms (e.g., an internal-only build with documented exception), auditors may mark the requirement not-applicable during evidence review with documented justification in security_manifest. In practice every Intrinsic Code app at Tier 3+ requires platform integrity validation because secure storage, biometric authentication, and sandbox enforcement depend on an untampered OS."
+  },
+
+  "intrinsic_interpretation": {
+    "interpretation_version": "1.0",
+    "mapping_strength": "partial",
+    "mapping_rationale": "Constitution Pillar 5 covers MASVS-RESILIENCE-1 via two complementary primary traces: SEC-PILLAR-5-JAILBREAK-DETECTION (heuristic on-device detection of OS tampering — jailbreak indicators on iOS, root indicators on Android, with declared response policy of terminate or degraded read-only mode) and SEC-PILLAR-5-PLATFORM-ATTESTATION (platform-provided cryptographic attestation services — Apple App Attest on iOS, which attests to app instance integrity and request legitimacy; Google Play Integrity on Android, which provides broader device, app, and account-details verdicts — both for backend verification). Both are labeled primary because RESILIENCE-1's scope distributes across two distinct validation layers: heuristic on-device detection (JAILBREAK-DETECTION) and cryptographically-strong platform attestation (PLATFORM-ATTESTATION). On iOS specifically, App Attest is not a full substitute for jailbreak detection because its attestation scope is app instance + request legitimacy rather than device platform integrity; combining heuristic jailbreak detection with App Attest provides defense-in-depth. On Android, Play Integrity provides broader coverage but heuristic root detection still adds defense-in-depth against tooling that defeats the integrity API. Implementation correctness for heuristic detection (avoiding known bypass patterns, declaring response policy in manifest, avoiding false positives on legitimate developer builds) and for attestation flows (server-side verification of attestation tokens, handling key-attestation failures, replay-resistance via nonces) requires auditor judgment beyond manifest declaration. The mapping is partial because RESILIENCE-1's scope spans two separable validation strategies; neither single trace covers the full breadth, and the two-trace coverage substantively addresses both the heuristic and the cryptographic halves.",
+    "verification_guidance": {
+      "evidence_locator_types": [
+        "symbol_pattern",
+        "config_pattern",
+        "manifest_entry",
+        "dependency_declaration"
+      ],
+      "expected_evidence_patterns": [
+        "iOS: jailbreak detection via multiple complementary checks — sandbox-violation file write (writing to /private/ to detect unsandboxed processes), suspicious-binary checks (/Applications/Cydia.app and equivalents), system-call presence detection (fork() exit codes, /bin/sh availability via system())",
+        "iOS: App Attest integration via DCAppAttestService — generates an attestation key, attests it against Apple's service, sends the attestation object to the backend for verification of app instance integrity and request legitimacy (App Attest scope is app-instance-level, not full device platform integrity; complements heuristic jailbreak detection rather than substituting for it)",
+        "Android: root detection via multiple complementary checks — su binary presence, busybox binary presence, root-management app presence (com.koushikdutta.superuser, com.noshufou.android.su, etc), SELinux enforcement state",
+        "Android: Play Integrity API via IntegrityManager — requests an integrity token, sends to backend for verification against Google's service, backend checks device-integrity / app-integrity / account-details verdicts",
+        "security_manifest declares the integrity-validation strategy: which checks are in place, response policy on detection (terminate / degraded-readonly / alert-and-continue), and attestation backend verification approach",
+        "Response policy enforced cryptographically where possible — sensitive operations gated by attestation-verified state rather than client-side boolean flag"
+      ],
+      "failure_indicators": [
+        "Single-check jailbreak/root detection — relying on one indicator (e.g., only checking for Cydia.app on iOS) — defeated by trivial hiding tools (e.g., Liberty, Shadow)",
+        "Jailbreak/root detection result used as a client-side boolean flag without cryptographic gating — vulnerable to runtime bypass via dynamic instrumentation (Frida, Cycript) flipping the flag",
+        "Attestation token verification performed client-side only — defeats the attestation chain because tampered client can return a fake \"verified\" result; attestation MUST be verified server-side",
+        "Attestation flow without nonce/challenge — vulnerable to replay attacks where attacker captures a legitimate attestation token and reuses it",
+        "App Attest / Play Integrity calls without error handling — silently failing attestation falls back to unattested operation, defeating the control",
+        "No declared response policy in security_manifest — detection without response is observation, not protection",
+        "Detection logic shipped in plain Swift/Kotlin without ANTI-STATIC-ANALYSIS protections — attacker can read the detection logic from the binary and disable it (combine RESILIENCE-1 with RESILIENCE-3 for defense-in-depth)"
+      ],
+      "false_positive_traps": [
+        "Platform-integrity handling inside test fixtures or test-only code paths (paths containing /test/, /tests/, /__tests__/, /spec/ OR functions/methods marked with @Test, @Ignore, @Disabled annotations). Test mocks legitimately stub attestation services; these are not production violations.",
+        "Developer / internal-distribution builds that disable jailbreak detection (e.g., for QA on jailbroken test devices) are NOT violations as long as the disablement is gated on a build-config flag that is verifiably false in production builds — security_manifest must declare the build-variant scoping.",
+        "iOS apps distributed only via the App Store with App Attest verification may legitimately have minimal heuristic jailbreak detection because App Attest itself attests to platform integrity — the violation surface is NO integrity validation, not the absence of heuristic checks when attestation is in place.",
+        "Apps that intentionally accept running on tampered platforms (e.g., a read-only utility with no sensitive data, a debugging tool) are NOT violations if the threat model explicitly accepts this — security_manifest must declare the accepted-risk posture; defaulting to no validation without declaration is the violation.",
+        "Attestation services returning soft failures (transient network errors, attestation service downtime) are NOT violations if the app gracefully degrades to a documented fallback rather than failing-open — declared in manifest as the soft-fail policy."
+      ]
+    },
+    "interpretation_review": {
+      "interpretation_authority": "intrinsic_code_internal_review",
+      "review_status": "pre_audit",
+      "external_review_type": "none",
+      "external_reviewer": null,
+      "external_review_date": null,
+      "external_review_scope": null
+    }
+  },
+
+  "standards_body_endorsement": {
+    "endorsed": false,
+    "endorsement_authority": null,
+    "endorsement_evidence_locator": null,
+    "endorsement_evidence_sha256": null,
+    "endorsement_evidence_public_accessibility": false,
+    "endorsement_date": null,
+    "endorsement_scope": null
+  },
+
+  "claim_boundaries": {
+    "allowed_claims": [
+      "uses Constitution Pillar 5 jailbreak-detection discipline (SEC-PILLAR-5-JAILBREAK-DETECTION) as primary evidence toward MASVS-RESILIENCE-1 coverage on the heuristic on-device-tampering vector",
+      "uses Constitution Pillar 5 platform-attestation discipline (SEC-PILLAR-5-PLATFORM-ATTESTATION) as primary evidence toward MASVS-RESILIENCE-1 coverage on the cryptographic platform-integrity vector",
+      "performs platform-trust verification via Apple App Attest (app instance integrity, iOS) and Google Play Integrity (device, app, and account-details verdicts, Android) with server-side verification of attestation tokens per MASVS-RESILIENCE-1 platform-best-practice requirement"
+    ],
+    "softened_claims": [
+      "addresses MASVS-RESILIENCE-1",
+      "aligned with MASVS-RESILIENCE-1 platform-integrity guidance"
+    ],
+    "forbidden_claims": [],
+    "requires_external_certification": false,
+    "claim_boundary_notes": "Standard-level baseline (from manifest.json.standard_claim_policy) already covers OWASP-wide forbidden claims. No requirement-specific additions needed for MASVS-RESILIENCE-1. MASVS-RESILIENCE-1 is mapped to two Constitution v0.5 traces in mapping file v1.2: SEC-PILLAR-5-JAILBREAK-DETECTION (primary, heuristic detection layer) and SEC-PILLAR-5-PLATFORM-ATTESTATION (primary, cryptographic attestation layer). Both are labeled primary because RESILIENCE-1's scope distributes across two separable validation strategies; the partial-mapping label is honest about this. Claims about platform integrity validation depend on the chosen mechanism — heuristic detection claims require multi-check coverage with cryptographic gating; attestation claims require server-side token verification with nonce/replay-window discipline. Defense-in-depth: RESILIENCE-1 protections become more credible when combined with RESILIENCE-3 (ANTI-STATIC-ANALYSIS) so detection logic cannot be trivially read out of the binary and disabled. Tier routing handled downstream by Reaper Conclave matrix; the listed Reaper auditors consume this requirement when invoked for the bundle's tier and surface."
+  },
+
+  "intrinsic_mapping": {
+    "constitution_versions": ["0.5"],
+    "constitutional_trace_ids": [
+      "SEC-PILLAR-5-JAILBREAK-DETECTION",
+      "SEC-PILLAR-5-PLATFORM-ATTESTATION"
+    ],
+    "receipt_fields": [
+      "external_standards_summary",
+      "constitutional_traces"
+    ],
+    "auditor_consumers": [
+      "file_standards_auditor",
+      "external_standards_mapping_auditor",
+      "reaper-mobile"
+    ]
+  },
+
+  "lifecycle": {
+    "status": "active",
+    "supersedes": [],
+    "superseded_by": [],
+    "effective_date": "2024-01-18",
+    "withdrawn_date": null
+  },
+
+  "transcription_metadata": {
+    "corpus_version": "v0.1.0",
+    "transcribed_date": "2026-05-20"
+  }
+}

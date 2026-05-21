@@ -1,0 +1,153 @@
+{
+  "standard_id": "MASVS-RESILIENCE-3",
+
+  "normative_source": {
+    "standard_name": "OWASP Mobile Application Security Verification Standard",
+    "standard_version": "2.1.0",
+    "standard_version_date": "2024-01-18",
+    "source_section": "MASVS-RESILIENCE: Resilience Against Reverse Engineering and Tampering — MASVS-RESILIENCE-3 (page 31)",
+    "source_locator": "https://mas.owasp.org/MASVS/controls/MASVS-RESILIENCE-3/",
+    "requirement_title": "The app implements anti-static analysis mechanisms.",
+    "normative_excerpt": "Per OWASP MASVS v2.1.0 §MASVS-RESILIENCE-3 (Description): Understanding the internals of an app is typically the first step towards tampering with it (either dynamically, or statically). This control tries to impede comprehension by making it as difficult as possible to figure out how an app works using static analysis.",
+    "normative_summary": "Mobile apps must implement build-time anti-static-analysis protections that impede an attacker's ability to figure out how the app works by inspecting the shipped binary — code obfuscation (renaming symbols to non-meaningful identifiers), string encryption for sensitive strings (URLs, API keys, security-related constants), control-flow obfuscation where the platform supports it (R8/ProGuard optimization with rules on Android; optional vetted third-party obfuscation tooling on iOS where the threat model requires it), Swift compilation and linker optimization with symbol stripping and dead-code elimination on iOS, and removal of unused symbols and dead code from release binaries. These protections do not prevent static analysis but raise the cost of comprehension; control-flow obfuscation specifically is not delivered by Swift compiler optimization or linker dead-stripping alone — those reduce surface area but do not transform control flow.",
+    "verbatim_allowed": true,
+    "external_references": [
+      "https://mas.owasp.org/MASVS/controls/MASVS-RESILIENCE-3/",
+      "https://mas.owasp.org/MASVS/09-MASVS-RESILIENCE/",
+      "https://developer.android.com/build/shrink-code",
+      "https://www.guardsquare.com/proguard"
+    ]
+  },
+
+  "source_rights": {
+    "license": "CC-BY-SA-4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "redistribution_allowed": true,
+    "public_archive_allowed": true,
+    "verbatim_excerpt_allowed": true,
+    "attribution_required": true,
+    "license_notes": "Source license recorded from the downloaded OWASP MASVS v2.1.0 PDF artifact. Live website may differ; this corpus pins the artifact license. Verbatim excerpts include attribution per CC-BY-SA-4.0 §3."
+  },
+
+  "source_integrity": {
+    "source_artifact_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
+    "transcription_input_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
+    "requirement_file_sha256": "64a0e1b46c4020d29d3a8c5ff6c9e7ca5e2cabf4c219f172fcd0ecfaeb53bd05"
+  },
+
+  "applicability": {
+    "tier_floor": 3,
+    "conditions_logic": "all",
+    "conditions": [
+      {
+        "field": "security_manifest.app_tier",
+        "operator": ">=",
+        "value": 3
+      }
+    ],
+    "human_note": "Applies at Tier 3+ as a conservative corpus-level gate. Per Constitution Pillar 5 (Secure Architecture & Runtime), anti-static-analysis discipline activates at Tier 3+ where the app handles user authentication and private user-to-user content; the primary trace SEC-PILLAR-5-ANTI-STATIC-ANALYSIS is a Tier 3-5 control (new in Constitution v0.5). The blueprint schema does not currently declare a discrete obfuscation-required field as a top-level applicability filter, so security_manifest.app_tier >= 3 is used as a broad proxy. If a Tier 3+ app explicitly accepts the threat-model risk of plain-text binary inspection (e.g., an open-source app with documented exception), auditors may mark the requirement not-applicable during evidence review with documented justification in security_manifest. In practice every Intrinsic Code app at Tier 3+ requires anti-static-analysis protections because authentication and private-content apps must impede comprehension of detection logic, key derivation, and integrity-check implementations that defend RESILIENCE-1 and RESILIENCE-2."
+  },
+
+  "intrinsic_interpretation": {
+    "interpretation_version": "1.0",
+    "mapping_strength": "direct",
+    "mapping_rationale": "Constitution Pillar 5's SEC-PILLAR-5-ANTI-STATIC-ANALYSIS trace was added in v0.5 specifically to provide a 1:1 mapping to MASVS-RESILIENCE-3. The trace requires build-time anti-static-analysis protections — code obfuscation, string encryption for sensitive strings, control-flow obfuscation where platform supports it (R8/ProGuard optimization with rules on Android; optional vetted third-party obfuscation tooling on iOS where the threat model requires it), Swift compilation and linker optimization with symbol stripping on iOS, and removal of unused symbols and dead code from release binaries — with build-time protections declared in security_manifest. This directly implements MASVS-RESILIENCE-3's requirement that the app impede comprehension via static analysis. The mapping is direct because the trace and the MASVS control state the same requirement. Implementation correctness for the chosen mechanisms (ProGuard/R8 keep-rules avoiding obfuscation gaps, string-encryption coverage of actually-sensitive constants vs trivial strings, Swift symbol-stripping and dead-code elimination effectiveness, decision on third-party iOS obfuscation tooling vs accepting that Swift compiler optimization alone does not deliver control-flow obfuscation) requires auditor judgment beyond manifest declaration. The mapping is direct at the control-statement level, but the auditor evaluation chain (file_standards_auditor + reaper-mobile) is necessary for full evaluation of correctness.",
+    "verification_guidance": {
+      "evidence_locator_types": [
+        "symbol_pattern",
+        "config_pattern",
+        "manifest_entry",
+        "dependency_declaration"
+      ],
+      "expected_evidence_patterns": [
+        "Android: R8 enabled in release build (`minifyEnabled true` in app's build.gradle release config); ProGuard rules file present with documented keep-rules for reflection-required classes only",
+        "Android: shrinkResources true alongside minifyEnabled true in release config — removes unused resources alongside unused code",
+        "Android: ProGuard rules file declares no overly-broad -keep directives (e.g., -keep class ** does NOT appear; keeps are scoped to specific reflection-required classes)",
+        "iOS: release build configuration declares -O optimization with -Xlinker -dead_strip and -Xlinker -no_dead_strip_inits_and_terms for size reduction and symbol-table trimming (not control-flow obfuscation by itself)",
+        "iOS: SWIFT_OPTIMIZATION_LEVEL set to -O or -Owholemodule in release; SWIFT_COMPILATION_MODE set to wholemodule for cross-module optimization",
+        "Sensitive constants (auth URLs, API keys for build-time tokens, encryption pepper values, jailbreak-detection target strings) NOT present as plain strings in the binary — verified by `strings` against the release IPA/APK; values appear only encrypted or constructed at runtime",
+        "security_manifest declares build-time-protection inventory: which protections are enabled (R8/ProGuard rules version, string encryption library, symbol-stripping flags), and which sensitive surfaces are explicitly covered",
+        "Detection-logic sensitive paths (RESILIENCE-1 jailbreak-check, RESILIENCE-2 anti-tamper signature comparison) get extra obfuscation treatment — function names and control flow obscured beyond baseline"
+      ],
+      "failure_indicators": [
+        "Android: minifyEnabled false in release build configuration — ships unminified, un-renamed Kotlin/Java symbols readable by any decompiler (jadx, Bytecode Viewer)",
+        "Android: ProGuard rules with overly-broad keeps (e.g., -keep class ** { *; } or -dontobfuscate) — defeats obfuscation by preserving all symbols",
+        "iOS: SWIFT_OPTIMIZATION_LEVEL set to -Onone in release build — ships unoptimized binary with full symbol metadata visible in disassembly",
+        "Sensitive constants (auth URLs, API keys, jailbreak-detection target paths, signing-cert hashes) present as plain strings in the binary — verified by attacker running `strings` against the release artifact",
+        "Detection logic in plain-text symbol names — `isJailbroken()`, `verifySignature()`, `checkPlatformIntegrity()` discoverable via symbol table; attackers locate and patch out detection in minutes",
+        "Reflection-driven code (Kotlin DSLs, GSON-style JSON binding, Jetpack libraries) keeping more classes than necessary in ProGuard rules — opens obfuscation gaps that bleed into non-reflective code",
+        "Resource files (raw assets, JSON config, embedded scripts) shipped without obfuscation when they contain sensitive logic — attacker reads logic from assets even if Java/Kotlin is obfuscated",
+        "Native libraries (.so on Android, dylib on iOS) shipped without symbol stripping — `nm` against the library reveals function names; combine with Swift symbol hiding and `strip` post-build"
+      ],
+      "false_positive_traps": [
+        "Anti-static-analysis handling inside test fixtures or test-only code paths (paths containing /test/, /tests/, /__tests__/, /spec/ OR functions/methods marked with @Test, @Ignore, @Disabled annotations). Test builds legitimately ship unobfuscated; these are not production violations.",
+        "Developer / internal-distribution debug builds with obfuscation disabled (debugSigning, internal QA distribution) are NOT violations as long as the disablement is gated on a build-config flag that is verifiably false in production builds — security_manifest must declare the build-variant scoping.",
+        "Open-source apps whose source code is intentionally public are NOT subject to the same anti-static-analysis claims for the public-source portions — security_manifest must declare which surfaces are intentionally public; closed/sensitive surfaces (detection logic, key-derivation paths) still require protection for credibility.",
+        "ProGuard keep-rules for legitimate reflection targets (data classes for JSON parsing, Jetpack lifecycle classes, Hilt-injected types) are NOT violations as long as the keep-rules are scoped to those specific types; the violation surface is unscoped keep-everything rules.",
+        "Apps with native code (NDK) where -fvisibility=hidden + symbol stripping is applied are NOT violations even though .so files exist — the violation surface is unstripped symbol tables, not the presence of native code itself."
+      ]
+    },
+    "interpretation_review": {
+      "interpretation_authority": "intrinsic_code_internal_review",
+      "review_status": "pre_audit",
+      "external_review_type": "none",
+      "external_reviewer": null,
+      "external_review_date": null,
+      "external_review_scope": null
+    }
+  },
+
+  "standards_body_endorsement": {
+    "endorsed": false,
+    "endorsement_authority": null,
+    "endorsement_evidence_locator": null,
+    "endorsement_evidence_sha256": null,
+    "endorsement_evidence_public_accessibility": false,
+    "endorsement_date": null,
+    "endorsement_scope": null
+  },
+
+  "claim_boundaries": {
+    "allowed_claims": [
+      "uses Constitution Pillar 5 anti-static-analysis discipline (SEC-PILLAR-5-ANTI-STATIC-ANALYSIS) as primary evidence toward MASVS-RESILIENCE-3 coverage",
+      "declares build-time anti-static-analysis protections in security_manifest (R8/ProGuard configuration, Swift optimization level, string encryption coverage) per MASVS-RESILIENCE-3 platform-best-practice requirement",
+      "applies anti-static-analysis protections to RESILIENCE-1 and RESILIENCE-2 detection logic surfaces as defense-in-depth, preventing trivial readout-and-disable of platform integrity and anti-tampering mechanisms"
+    ],
+    "softened_claims": [
+      "addresses MASVS-RESILIENCE-3",
+      "aligned with MASVS-RESILIENCE-3 anti-static-analysis guidance"
+    ],
+    "forbidden_claims": [],
+    "requires_external_certification": false,
+    "claim_boundary_notes": "Standard-level baseline (from manifest.json.standard_claim_policy) already covers OWASP-wide forbidden claims. No requirement-specific additions needed for MASVS-RESILIENCE-3. MASVS-RESILIENCE-3 is mapped to one Constitution v0.5 trace in mapping file v1.2: SEC-PILLAR-5-ANTI-STATIC-ANALYSIS (primary, direct). The trace was added in v0.5 specifically to provide a 1:1 mapping to RESILIENCE-3, so the mapping is direct rather than partial. Claims about anti-static-analysis security depend on the chosen mechanisms — obfuscation claims require non-trivial keep-rule scoping (no -dontobfuscate / overly-broad -keep); string-encryption claims require coverage of actually-sensitive constants (not trivial strings); symbol-stripping claims require post-build verification that the release artifact lacks readable symbol tables. Defense-in-depth: RESILIENCE-3 protections become substantially more valuable when combined with RESILIENCE-1 (platform integrity) and RESILIENCE-2 (anti-tampering) because they protect the detection logic those controls implement — RESILIENCE-3 without RESILIENCE-1/2 protects against general comprehension but provides no detection layer; RESILIENCE-1/2 without RESILIENCE-3 provides detection logic that attackers can trivially read and disable. Tier routing handled downstream by Reaper Conclave matrix; the listed Reaper auditors consume this requirement when invoked for the bundle's tier and surface."
+  },
+
+  "intrinsic_mapping": {
+    "constitution_versions": ["0.5"],
+    "constitutional_trace_ids": [
+      "SEC-PILLAR-5-ANTI-STATIC-ANALYSIS"
+    ],
+    "receipt_fields": [
+      "external_standards_summary",
+      "constitutional_traces"
+    ],
+    "auditor_consumers": [
+      "file_standards_auditor",
+      "external_standards_mapping_auditor",
+      "reaper-mobile"
+    ]
+  },
+
+  "lifecycle": {
+    "status": "active",
+    "supersedes": [],
+    "superseded_by": [],
+    "effective_date": "2024-01-18",
+    "withdrawn_date": null
+  },
+
+  "transcription_metadata": {
+    "corpus_version": "v0.1.0",
+    "transcribed_date": "2026-05-20"
+  }
+}
