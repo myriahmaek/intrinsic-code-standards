@@ -1,0 +1,155 @@
+{
+  "standard_id": "MASVS-RESILIENCE-4",
+
+  "normative_source": {
+    "standard_name": "OWASP Mobile Application Security Verification Standard",
+    "standard_version": "2.1.0",
+    "standard_version_date": "2024-01-18",
+    "source_section": "MASVS-RESILIENCE: Resilience Against Reverse Engineering and Tampering — MASVS-RESILIENCE-4 (pages 31-32)",
+    "source_locator": "https://mas.owasp.org/MASVS/controls/MASVS-RESILIENCE-4/",
+    "requirement_title": "The app implements anti-dynamic analysis techniques.",
+    "normative_excerpt": "Per OWASP MASVS v2.1.0 §MASVS-RESILIENCE-4 (Description): Sometimes pure static analysis is very difficult and time consuming so it typically goes hand in hand with dynamic analysis. Observing and manipulating an app during runtime makes it much easier to decipher its behavior. This control aims to make it as difficult as possible to perform dynamic analysis, as well as prevent dynamic instrumentation which could allow an attacker to modify the code at runtime.",
+    "normative_summary": "Mobile apps must implement runtime anti-dynamic-analysis defenses that raise the cost of observing and manipulating the app while it is executing — debugger detection (PTRACE-based on iOS, ptrace and JDWP-based on Android), debugger-attach prevention, debug-symbol stripping, dynamic instrumentation detection (Frida, Cycript, Xposed, Substrate hooks), emulator detection where the threat model warrants it, and declared response policy on detection (terminate, degraded read-only mode, alert-and-continue). The control complements RESILIENCE-2 (anti-tampering) and RESILIENCE-3 (anti-static-analysis) as the third arm of defense-in-depth against reverse engineering and runtime modification.",
+    "verbatim_allowed": true,
+    "external_references": [
+      "https://mas.owasp.org/MASVS/controls/MASVS-RESILIENCE-4/",
+      "https://mas.owasp.org/MASVS/09-MASVS-RESILIENCE/",
+      "https://developer.apple.com/library/archive/qa/qa1361/_index.html",
+      "https://developer.android.com/reference/android/os/Debug"
+    ]
+  },
+
+  "source_rights": {
+    "license": "CC-BY-SA-4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "redistribution_allowed": true,
+    "public_archive_allowed": true,
+    "verbatim_excerpt_allowed": true,
+    "attribution_required": true,
+    "license_notes": "Source license recorded from the downloaded OWASP MASVS v2.1.0 PDF artifact. Live website may differ; this corpus pins the artifact license. Verbatim excerpts include attribution per CC-BY-SA-4.0 §3."
+  },
+
+  "source_integrity": {
+    "source_artifact_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
+    "transcription_input_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
+    "requirement_file_sha256": "e77e40bb63b318b48c3912408300b5c10aec27888c80e4e1c608ab83313621b4"
+  },
+
+  "applicability": {
+    "tier_floor": 2,
+    "conditions_logic": "all",
+    "conditions": [
+      {
+        "field": "security_manifest.app_tier",
+        "operator": ">=",
+        "value": 2
+      }
+    ],
+    "human_note": "Applies at Tier 2+ as a conservative corpus-level gate. Per Constitution Pillar 5 (Secure Architecture & Runtime), anti-dynamic-analysis discipline activates at Tier 2+ where the app handles content distribution and analytics; the dedicated trace SEC-PILLAR-5-ANTI-DEBUG is a Tier 2-5 control. The blueprint schema does not currently declare a discrete anti-dynamic-analysis-strategy field as a top-level applicability filter, so security_manifest.app_tier >= 2 is used as a broad proxy. If a Tier 2+ app explicitly accepts the threat-model risk of dynamic analysis (e.g., an open-source app with documented exception, an internal debug build) and supplies justification, auditors may mark the requirement not-applicable during evidence review with documented justification in security_manifest. In practice every Intrinsic Code app at Tier 2+ requires anti-dynamic-analysis protections because runtime instrumentation by tools like Frida is the primary practical attack vector against detection logic implemented for RESILIENCE-1, RESILIENCE-2, and platform integrity controls."
+  },
+
+  "intrinsic_interpretation": {
+    "interpretation_version": "1.0",
+    "mapping_strength": "direct",
+    "mapping_rationale": "Constitution Pillar 5's SEC-PILLAR-5-ANTI-DEBUG trace and MASVS-RESILIENCE-4 describe the same control by name and substance. The Constitution trace requires anti-debug measures in production builds — debugger detection, debugger-attach prevention, debug-symbol stripping, and dynamic-instrumentation detection (Frida/Cycript/Xposed/Substrate hook detection) — which directly implements MASVS-RESILIENCE-4's requirement to impede dynamic analysis and prevent dynamic instrumentation. The mapping is direct because the trace and the MASVS control state the same requirement at the same level of abstraction; RESILIENCE-4's framing of \"variability/unpredictability\" manifests as randomized debugger-check timing and placement within the anti-debug discipline. Implementation correctness for the chosen mechanisms (ptrace-based detection that bypass tools haven't already patched, JDWP detection on Android, Frida/Cycript signature scanning, declared response policy enforcement via cryptographic gating rather than client-side boolean flag, randomized re-check intervals to defeat one-time-hook bypass) requires auditor judgment beyond manifest declaration. The mapping is direct at the control-statement level, but the auditor evaluation chain (file_standards_auditor + reaper-mobile) is necessary for full evaluation of correctness.",
+    "verification_guidance": {
+      "evidence_locator_types": [
+        "symbol_pattern",
+        "config_pattern",
+        "manifest_entry",
+        "dependency_declaration"
+      ],
+      "expected_evidence_patterns": [
+        "iOS: platform-appropriate anti-debug / debugger-attach resistance — techniques such as ptrace(PT_DENY_ATTACH) where permitted by Apple's review guidelines, sysctl(KERN_PROC, KERN_PROC_PID) checks for P_TRACED flag, symbol stripping, and randomized runtime checks; the specific mechanism is platform-dependent and the discipline is meaningful detection plus declared response rather than any one mandatory API call",
+        "iOS: production build strips symbols from the shipped binary (STRIP_INSTALLED_PRODUCT enabled, STRIP_STYLE set to all) while the separate dSYM bundle is retained only in the build/archive system for crash symbolication and not packaged into the distributed app — dSYM generation itself (DEBUG_INFORMATION_FORMAT set to dwarf-with-dsym) is the normal crash-reporting pattern, the discipline is that shipped binaries lack readable symbol tables while debug-info is preserved internally",
+        "Android: java.lang.Runtime.getRuntime() check for android.os.Debug.isDebuggerConnected() at randomized intervals; verify against expected production-build false value",
+        "Android: native-side ptrace TracerPid check via /proc/self/status — verify TracerPid is 0 (no tracing parent process attached)",
+        "Android: dynamic-instrumentation detection — scan loaded native libraries for known Frida/Cycript signatures (frida-agent, gum-js-loop), check for suspicious mmap'd regions with rwx permissions",
+        "Production builds set android:debuggable=\"false\" in AndroidManifest.xml (default for release builds but should be explicitly declared and verified)",
+        "Declared response policy enforced cryptographically — sensitive operations gated by attestation-verified or backend-verified state rather than client-side boolean flag, so even if instrumentation flips a detection flag the gating remains",
+        "Randomized re-check intervals throughout app lifetime (not just one-shot at launch) — defeats attackers who hook only the launch-time check"
+      ],
+      "failure_indicators": [
+        "iOS: no production anti-debug / debugger-attach resistance mechanism — neither ptrace-based denial, sysctl P_TRACED check, nor any equivalent technique present; debugger attaches unimpeded and the absence is silently tolerated rather than detected with declared response",
+        "iOS: debug symbols present in the shipped binary itself (not just dSYM in the build system) — readable symbol tables in the distributed IPA give attackers function-name surface for instrumentation; the dSYM bundle in build/archive storage is fine and expected for crash symbolication",
+        "Android: android:debuggable=\"true\" in production AndroidManifest.xml — allows debugger attach without restriction; should be false (default but explicitly verified)",
+        "Android: no Debug.isDebuggerConnected() or TracerPid check — debugger and ptrace-based tooling attach without detection",
+        "Anti-debug logic that runs only once at app launch — attacker bypasses with one-time Frida hook; needs randomized re-checks throughout app lifetime (especially before sensitive operations)",
+        "Anti-debug result used as client-side boolean flag without cryptographic gating — vulnerable to runtime bypass via Frida/Cycript flipping the flag (the canonical RESILIENCE-4 attack the control defends against)",
+        "No detection of dynamic-instrumentation frameworks (Frida, Cycript, Xposed, Substrate) — debugger detection alone is insufficient because Frida operates via process injection, not classical debugger attach",
+        "Anti-debug logic shipped in plain Swift/Kotlin without ANTI-STATIC-ANALYSIS protections — attacker reads detection logic out of the binary and disables it (RESILIENCE-4 without RESILIENCE-3 is brittle)",
+        "Detection runs but no declared response policy in security_manifest — observation without response is not protection"
+      ],
+      "false_positive_traps": [
+        "Anti-dynamic-analysis handling inside test fixtures or test-only code paths (paths containing /test/, /tests/, /__tests__/, /spec/ OR functions/methods marked with @Test, @Ignore, @Disabled annotations). Test fixtures legitimately allow debugger attach for test instrumentation; these are not production violations.",
+        "Developer / internal-distribution debug builds with anti-debug disabled (for debugging during development) are NOT violations as long as the disablement is gated on a build-config flag that is verifiably false in production builds — security_manifest must declare the build-variant scoping.",
+        "Apps that intentionally accept dynamic-analysis risk (e.g., open-source apps with documented public-debug-allowed posture, debugging tools whose purpose is to interact with debugger sessions) are NOT violations if security_manifest declares the accepted-risk posture; defaulting to no protection without declaration is the violation.",
+        "Emulator detection is NOT mandatory under RESILIENCE-4 baseline — emulator-based testing has legitimate uses; the violation surface is no detection of actual instrumentation tools (Frida/Cycript/Xposed), not the absence of emulator-blocking.",
+        "Alert-and-continue response policy is NOT inherently a violation if it routes through audit telemetry plus optional remote revocation — terminate-on-detection is one valid policy among several, not the only valid policy."
+      ]
+    },
+    "interpretation_review": {
+      "interpretation_authority": "intrinsic_code_internal_review",
+      "review_status": "pre_audit",
+      "external_review_type": "none",
+      "external_reviewer": null,
+      "external_review_date": null,
+      "external_review_scope": null
+    }
+  },
+
+  "standards_body_endorsement": {
+    "endorsed": false,
+    "endorsement_authority": null,
+    "endorsement_evidence_locator": null,
+    "endorsement_evidence_sha256": null,
+    "endorsement_evidence_public_accessibility": false,
+    "endorsement_date": null,
+    "endorsement_scope": null
+  },
+
+  "claim_boundaries": {
+    "allowed_claims": [
+      "uses Constitution Pillar 5 anti-debug discipline (SEC-PILLAR-5-ANTI-DEBUG) as primary evidence toward MASVS-RESILIENCE-4 coverage",
+      "implements debugger detection (ptrace PT_DENY_ATTACH on iOS, Debug.isDebuggerConnected and TracerPid checks on Android) with randomized re-check timing per MASVS-RESILIENCE-4 platform-best-practice requirement",
+      "detects dynamic-instrumentation frameworks (Frida, Cycript, Xposed, Substrate) via signature scanning of loaded libraries and memory-region permissions",
+      "declares anti-debug response policy in security_manifest (terminate / degraded mode / alert-and-continue)"
+    ],
+    "softened_claims": [
+      "addresses MASVS-RESILIENCE-4",
+      "aligned with MASVS-RESILIENCE-4 anti-dynamic-analysis guidance"
+    ],
+    "forbidden_claims": [],
+    "requires_external_certification": false,
+    "claim_boundary_notes": "Standard-level baseline (from manifest.json.standard_claim_policy) already covers OWASP-wide forbidden claims. No requirement-specific additions needed for MASVS-RESILIENCE-4. MASVS-RESILIENCE-4 is mapped to one Constitution v0.5 trace in mapping file v1.2: SEC-PILLAR-5-ANTI-DEBUG (primary, direct). The mapping is direct because the trace and the MASVS control state the same requirement at the same level of abstraction. Claims about anti-dynamic-analysis depend on the chosen mechanisms — claims about debugger detection require multi-check coverage with cryptographic gating; claims about instrumentation-framework detection require coverage of actually-used tools (Frida and Cycript are the practical baseline; Xposed and Substrate add Android-specific coverage); claims about randomized re-check timing require auditable interval policy. Defense-in-depth: RESILIENCE-4 protections become substantially more credible when combined with RESILIENCE-2 (anti-tampering) and RESILIENCE-3 (anti-static-analysis to prevent trivial readout of detection logic). RESILIENCE-4 without RESILIENCE-3 is brittle because attackers can read the anti-debug logic from the binary and patch it out. Tier routing handled downstream by Reaper Conclave matrix; the listed Reaper auditors consume this requirement when invoked for the bundle's tier and surface."
+  },
+
+  "intrinsic_mapping": {
+    "constitution_versions": ["0.5"],
+    "constitutional_trace_ids": [
+      "SEC-PILLAR-5-ANTI-DEBUG"
+    ],
+    "receipt_fields": [
+      "external_standards_summary",
+      "constitutional_traces"
+    ],
+    "auditor_consumers": [
+      "file_standards_auditor",
+      "external_standards_mapping_auditor",
+      "reaper-mobile"
+    ]
+  },
+
+  "lifecycle": {
+    "status": "active",
+    "supersedes": [],
+    "superseded_by": [],
+    "effective_date": "2024-01-18",
+    "withdrawn_date": null
+  },
+
+  "transcription_metadata": {
+    "corpus_version": "v0.1.0",
+    "transcribed_date": "2026-05-20"
+  }
+}

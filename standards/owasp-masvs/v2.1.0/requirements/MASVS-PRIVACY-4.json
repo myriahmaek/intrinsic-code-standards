@@ -1,0 +1,157 @@
+{
+  "standard_id": "MASVS-PRIVACY-4",
+
+  "normative_source": {
+    "standard_name": "OWASP Mobile Application Security Verification Standard",
+    "standard_version": "2.1.0",
+    "standard_version_date": "2024-01-18",
+    "source_section": "MASVS-PRIVACY: Privacy — MASVS-PRIVACY-4 (page 35)",
+    "source_locator": "https://mas.owasp.org/MASVS/controls/MASVS-PRIVACY-4/",
+    "requirement_title": "The app offers user control over their data.",
+    "normative_excerpt": "Per OWASP MASVS v2.1.0 §MASVS-PRIVACY-4 (Description): Users should have control over their data. This control ensures that apps provide mechanisms for users to manage, delete, and modify their data, and change privacy settings as needed (e.g. to revoke consent). Additionally, apps should re-prompt for consent and update their transparency disclosures when they require more data than initially specified.",
+    "normative_summary": "Mobile apps must provide user-controlled mechanisms across four substantive layers: data management (view what data is held, modify it), data deletion (delete specific data classes or the entire account), privacy-setting modification (change consent decisions, opt out of specific data flows, withdraw consent with cascading deletion where applicable), and re-prompt-on-scope-expansion (when the app needs more data than the user originally consented to, the user must be re-prompted with updated disclosure rather than silently expanded). Platform store requirements (Apple App Store 5.1.1(v), Google Play account-deletion policy) make in-app account deletion mandatory for apps using user accounts.",
+    "verbatim_allowed": true,
+    "external_references": [
+      "https://mas.owasp.org/MASVS/controls/MASVS-PRIVACY-4/",
+      "https://mas.owasp.org/MASVS/11-MASVS-PRIVACY/",
+      "https://developer.apple.com/app-store/review/guidelines/#data-collection-and-storage",
+      "https://support.google.com/googleplay/android-developer/answer/13327826"
+    ]
+  },
+
+  "source_rights": {
+    "license": "CC-BY-SA-4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "redistribution_allowed": true,
+    "public_archive_allowed": true,
+    "verbatim_excerpt_allowed": true,
+    "attribution_required": true,
+    "license_notes": "Source license recorded from the downloaded OWASP MASVS v2.1.0 PDF artifact. Live website may differ; this corpus pins the artifact license. Verbatim excerpts include attribution per CC-BY-SA-4.0 §3."
+  },
+
+  "source_integrity": {
+    "source_artifact_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
+    "transcription_input_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
+    "requirement_file_sha256": "47d5c8a3a3407e09af7991ec6f38c78aec8a1acd9bfaab77a054c62a3e210a1b"
+  },
+
+  "applicability": {
+    "tier_floor": 2,
+    "conditions_logic": "all",
+    "conditions": [
+      {
+        "field": "security_manifest.app_tier",
+        "operator": ">=",
+        "value": 2
+      }
+    ],
+    "human_note": "Applies at Tier 2+ as a conservative corpus-level gate. Per Constitution Pillar 2 (Data & Identity Discipline), user data rights activate at Tier 2+ where the app handles content distribution and analytics; the primary trace SEC-PILLAR-2-USER-DATA-RIGHTS (new in Constitution v0.5) is a Tier 2-5 control, and the supporting trace SEC-PILLAR-7-LAST-MILE-COMPLIANCE is Tier 1-5. The blueprint schema does not currently declare a discrete user-data-rights-mechanism field as a top-level applicability filter, so security_manifest.app_tier >= 2 is used as a broad proxy. If a Tier 2+ app collects no user data (fully-anonymous read-only utility) and supplies justification, auditors may mark the requirement not-applicable during evidence review. In practice every Intrinsic Code app at Tier 2+ requires user data control because account-bearing content-distribution apps must implement in-app deletion paths per Apple App Store 5.1.1(v) and Google Play account-deletion policy, plus support consent withdrawal with cascading deletion."
+  },
+
+  "intrinsic_interpretation": {
+    "interpretation_version": "1.0",
+    "mapping_strength": "partial",
+    "mapping_rationale": "Constitution Pillar 2 covers MASVS-PRIVACY-4 via one dedicated primary trace and one supporting trace. SEC-PILLAR-2-USER-DATA-RIGHTS (primary, new in v0.5) is the dedicated Constitutional control for user-rights mechanism design — user-initiated data deletion mechanism, data export/portability mechanism, consent withdrawal with cascade to data deletion where applicable, and account deletion path required when the app uses user accounts. SEC-PILLAR-7-LAST-MILE-COMPLIANCE (supporting) covers the platform-store gate for these rights — Apple App Store 5.1.1(v) and Google Play account-deletion policy mandate in-app account deletion paths, and the last-mile-compliance discipline declares these structured platform-store inputs. The mapping is partial because PRIVACY-4's scope distributes across mechanism design (USER-DATA-RIGHTS) and platform-store surfacing (LAST-MILE-COMPLIANCE), with the re-prompt-on-scope-expansion requirement (re-prompt for consent when more data is needed than initially specified) flowing partially through both traces but remaining auditor-evaluation surface for the consent-update flow itself. Implementation correctness for deletion-completeness (deletion actually cascades through external processors per their declared retention policies; deletion is irreversible and verifiable from the user's perspective), export-portability format (machine-readable, standard formats), and re-prompt-on-scope-expansion ordering (re-prompt before new data collection begins, not after) requires auditor judgment beyond manifest declaration.",
+    "verification_guidance": {
+      "evidence_locator_types": [
+        "symbol_pattern",
+        "config_pattern",
+        "manifest_entry",
+        "dependency_declaration"
+      ],
+      "expected_evidence_patterns": [
+        "In-app data management surface accessible from app settings — user can view what personal data is held by the app (data classes, retention duration, where stored)",
+        "In-app data deletion surface — user can delete specific data classes (e.g., search history) and/or the entire account; deletion confirmation flow includes explicit warning about irreversibility",
+        "In-app account deletion path present, clearly labeled, and reasonably discoverable from app settings or account settings without requiring external support contact, per Apple App Store 5.1.1(v) and Google Play account-deletion policy",
+        "Deletion request triggers backend cascade — deletion propagates to external processors per their declared retention policies; security_manifest.external_processor_retention[] lists the cascade paths",
+        "Consent withdrawal mechanism cascading where applicable — withdrawing consent for analytics triggers deletion of previously-collected analytics data per declared retention policy; not just \"future-only opt-out\"",
+        "Data export / portability mechanism — user can export their personal data in a machine-readable format (JSON, CSV, or structured archive); export includes all data classes declared in security_manifest.data_retention_policies",
+        "Re-prompt-on-scope-expansion flow — when app requests more data than originally consented to (new permission, new external processor, expanded retention duration), user is re-prompted with updated disclosure before the expanded collection begins",
+        "security_manifest.last_mile_gates declares: in_app_account_deletion_status, in_app_data_export_status, consent_withdrawal_cascade_paths, re_prompt_on_scope_expansion_status"
+      ],
+      "failure_indicators": [
+        "No in-app account deletion path — app uses user accounts but only allows account deletion via email/website request; Apple App Store rejection risk plus PRIVACY-4 violation",
+        "In-app account deletion path hidden, obscurely labeled, or reachable only via external support contact (email, web form, phone) — fails the discoverability standard required by Apple App Store 5.1.1(v) and Google Play account-deletion policy; user-control-effectiveness requires clear in-app labeling and reasonable findability from settings or account-management surfaces",
+        "Account deletion that doesn't actually delete — \"deletion\" leaves account in disabled state with data retained indefinitely; not deletion, violates user expectations and regulatory requirements",
+        "Account deletion doesn't cascade to external processors — declared external_processor_retention[] paths but no actual deletion-request signaling to those processors when user requests deletion",
+        "No data export mechanism — user has no way to obtain their own data in a portable format; violates portability layer of PRIVACY-4",
+        "Consent withdrawal that's future-only with no cascade — user withdraws analytics consent but historical analytics data retained indefinitely; declared retention should cascade to deletion on withdrawal where applicable",
+        "Scope expansion without re-prompt — app silently begins collecting new data class without re-prompting user with updated disclosure; the explicit anti-pattern PRIVACY-4 calls out",
+        "Privacy settings page exists but doesn't actually control data flows — toggles are cosmetic; SDK still collects regardless of toggle state",
+        "Deletion flow lacks irreversibility warning — user can accidentally delete account without explicit confirmation"
+      ],
+      "false_positive_traps": [
+        "Data-rights handling inside test fixtures or test-only code paths (paths containing /test/, /tests/, /__tests__/, /spec/ OR functions/methods marked with @Test, @Ignore, @Disabled annotations). Test fixtures legitimately stub deletion endpoints; these are not production violations.",
+        "Apps with no user-account concept (no login, no user-identifying data persisted) are NOT subject to account-deletion requirements — the violation surface is account-bearing apps without deletion paths, not all apps. security_manifest must declare the no-accounts posture.",
+        "Apps that retain certain data classes for legal-compliance reasons (transaction records required by financial regulation, audit logs required by HIPAA) after account deletion are NOT violations as long as security_manifest declares the legal-basis retention floor and the user is informed of which data classes are retained and why.",
+        "Apps that perform deletion via grace-period (e.g., 30-day soft-delete with reversal option) are NOT violations as long as the grace period is disclosed and the deletion is complete-and-irreversible after the grace window — soft-delete-with-disclosed-grace is a valid pattern.",
+        "Re-prompt-on-scope-expansion is NOT required when the expansion is a strict subset of what user already consented to (e.g., the user consented to \"location for navigation\" and now the app accesses location for the same navigation feature in a different module) — the violation surface is genuinely new data classes or new processors, not new uses of already-consented-to data within the same purpose scope."
+      ]
+    },
+    "interpretation_review": {
+      "interpretation_authority": "intrinsic_code_internal_review",
+      "review_status": "pre_audit",
+      "external_review_type": "none",
+      "external_reviewer": null,
+      "external_review_date": null,
+      "external_review_scope": null
+    }
+  },
+
+  "standards_body_endorsement": {
+    "endorsed": false,
+    "endorsement_authority": null,
+    "endorsement_evidence_locator": null,
+    "endorsement_evidence_sha256": null,
+    "endorsement_evidence_public_accessibility": false,
+    "endorsement_date": null,
+    "endorsement_scope": null
+  },
+
+  "claim_boundaries": {
+    "allowed_claims": [
+      "uses Constitution Pillar 2 user-data-rights discipline (SEC-PILLAR-2-USER-DATA-RIGHTS) as primary evidence toward MASVS-PRIVACY-4 coverage on the user-rights mechanism design vector",
+      "uses Constitution Pillar 7 last-mile-compliance discipline (SEC-PILLAR-7-LAST-MILE-COMPLIANCE) as supporting evidence toward MASVS-PRIVACY-4 coverage on the platform-store-surfacing vector (Apple App Store 5.1.1(v) and Google Play account-deletion policy)",
+      "provides in-app data management, deletion (including account deletion), export/portability, and consent-withdrawal mechanisms per MASVS-PRIVACY-4 platform-best-practice requirement",
+      "re-prompts user for consent when app scope expands to new data classes or new external processors, with updated transparency disclosure before expanded collection begins"
+    ],
+    "softened_claims": [
+      "addresses MASVS-PRIVACY-4",
+      "aligned with MASVS-PRIVACY-4 user-data-control guidance"
+    ],
+    "forbidden_claims": [],
+    "requires_external_certification": false,
+    "claim_boundary_notes": "Standard-level baseline (from manifest.json.standard_claim_policy) already covers OWASP-wide forbidden claims. No requirement-specific additions needed for MASVS-PRIVACY-4. MASVS-PRIVACY-4 is mapped to two Constitution v0.5 traces in mapping file v1.2: SEC-PILLAR-2-USER-DATA-RIGHTS (primary, dedicated user-rights mechanism control) and SEC-PILLAR-7-LAST-MILE-COMPLIANCE (supporting, platform-store gate layer). Claims about user data control are valid only when the dedicated primary trace is implemented; supporting-trace evidence alone does not satisfy PRIVACY-4 because the dedicated USER-DATA-RIGHTS semantics (deletion, export, consent withdrawal with cascade, re-prompt on scope expansion) are mandatory. Claims about deletion completeness depend on cascade behavior — claims that deletion is genuinely irreversible require backend verification and external-processor cascade evidence; claims about export portability require machine-readable format coverage of all declared data classes; claims about consent-withdrawal cascade require disclosed retention-cascade paths in security_manifest.external_processor_retention. Out of scope: subject access requests under GDPR Article 15 (overlap with PRIVACY-4 but governed by regulatory frameworks beyond MASVS scope; MASVS-PRIVACY disclaims substitution for these per the standard's IMPORTANT DISCLAIMER on page 33), retention of data classes mandated by other legal frameworks (e.g., HIPAA audit logs), and post-deletion forensic data preservation requirements. Tier routing handled downstream by Reaper Conclave matrix; the listed Reaper auditors consume this requirement when invoked for the bundle's tier and surface."
+  },
+
+  "intrinsic_mapping": {
+    "constitution_versions": ["0.5"],
+    "constitutional_trace_ids": [
+      "SEC-PILLAR-2-USER-DATA-RIGHTS",
+      "SEC-PILLAR-7-LAST-MILE-COMPLIANCE"
+    ],
+    "receipt_fields": [
+      "external_standards_summary",
+      "constitutional_traces"
+    ],
+    "auditor_consumers": [
+      "file_standards_auditor",
+      "external_standards_mapping_auditor",
+      "reaper-privacy",
+      "reaper-compliance"
+    ]
+  },
+
+  "lifecycle": {
+    "status": "active",
+    "supersedes": [],
+    "superseded_by": [],
+    "effective_date": "2024-01-18",
+    "withdrawn_date": null
+  },
+
+  "transcription_metadata": {
+    "corpus_version": "v0.1.0",
+    "transcribed_date": "2026-05-20"
+  }
+}
