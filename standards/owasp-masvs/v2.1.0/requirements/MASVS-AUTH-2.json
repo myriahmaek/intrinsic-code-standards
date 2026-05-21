@@ -1,0 +1,153 @@
+{
+  "standard_id": "MASVS-AUTH-2",
+
+  "normative_source": {
+    "standard_name": "OWASP Mobile Application Security Verification Standard",
+    "standard_version": "2.1.0",
+    "standard_version_date": "2024-01-18",
+    "source_section": "MASVS-AUTH: Authentication and Authorization — MASVS-AUTH-2 (page 22)",
+    "source_locator": "https://mas.owasp.org/MASVS/controls/MASVS-AUTH-2/",
+    "requirement_title": "The app performs local authentication securely according to the platform best practices.",
+    "normative_excerpt": "Per OWASP MASVS v2.1.0 §MASVS-AUTH-2 (Description): Many apps allow users to authenticate via biometrics or a local PIN code. These authentication mechanisms need to be correctly implemented. Additionally, some apps might not have a remote endpoint, and rely fully on local app authentication.",
+    "normative_summary": "Mobile apps that gate access via local authentication (biometrics, local PIN, or pattern) must implement those mechanisms correctly using platform-provided frameworks (LocalAuthentication on iOS, BiometricPrompt on Android). The platform frameworks handle template storage, secure-enclave-backed evaluation, and lockout policy — bypassing them or implementing custom biometric matching forfeits these protections. Apps that rely fully on local authentication (no remote endpoint) carry the full authentication burden on the device and must take additional care with credential storage, lockout enforcement, and key material binding to the local auth state.",
+    "verbatim_allowed": true,
+    "external_references": [
+      "https://mas.owasp.org/MASVS/controls/MASVS-AUTH-2/",
+      "https://mas.owasp.org/MASVS/06-MASVS-AUTH/",
+      "https://developer.apple.com/documentation/localauthentication",
+      "https://developer.android.com/training/sign-in/biometric-auth"
+    ]
+  },
+
+  "source_rights": {
+    "license": "CC-BY-SA-4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "redistribution_allowed": true,
+    "public_archive_allowed": true,
+    "verbatim_excerpt_allowed": true,
+    "attribution_required": true,
+    "license_notes": "Source license recorded from the downloaded OWASP MASVS v2.1.0 PDF artifact. Live website may differ; this corpus pins the artifact license. Verbatim excerpts include attribution per CC-BY-SA-4.0 §3."
+  },
+
+  "source_integrity": {
+    "source_artifact_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
+    "transcription_input_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
+    "requirement_file_sha256": "5c32678f1a5adff92bdd9916193c89b8fdb6ccd06c6100a650766335169cc919"
+  },
+
+  "applicability": {
+    "tier_floor": 3,
+    "conditions_logic": "all",
+    "conditions": [
+      {
+        "field": "technical.auth_flow",
+        "operator": "!=",
+        "value": "none"
+      }
+    ],
+    "human_note": "Applies to every app that declares an authentication flow (technical.auth_flow != \"none\"). Per Constitution Pillar 4 (Authentication & Identity), authentication discipline activates at Tier 3+ where the app handles user authentication and private user-to-user content. Apps with no authentication (technical.auth_flow == \"none\") are formally inapplicable. MASVS-AUTH-2 specifically targets the local-authentication leg (biometric or local PIN); the blueprint schema does not declare a separate \"has_local_auth\" field because Constitution Pillar 4's phishing-resistant default already routes local biometric/passkey authentication through platform frameworks as the primary mechanism. In practice every Intrinsic Code app at Tier 3+ that gates access uses platform biometrics or Passkeys as the local-auth surface."
+  },
+
+  "intrinsic_interpretation": {
+    "interpretation_version": "1.0",
+    "mapping_strength": "partial",
+    "mapping_rationale": "Constitution Pillar 4 covers MASVS-AUTH-2 via two complementary traces: SEC-PILLAR-4-PHISHING-RESISTANT-AUTH (supporting, the local-biometric and Passkey mechanism layer that runs through platform frameworks) and SEC-PILLAR-4-IDENTITY-VERIFICATION (supporting, liveness checks where applicable for high-assurance local authentication). MASVS-AUTH-2's scope covers correct platform-framework usage for local biometric and PIN authentication; Constitution treats phishing-resistant primitives (Passkeys, platform biometrics) as the canonical local-auth mechanism, with local PIN as a fallback within the same framework. Implementation correctness for biometric framework usage (LocalAuthentication policy selection on iOS, BiometricPrompt authenticator constraints on Android), lockout policy enforcement, biometric-key binding via Keychain access control or Keystore biometric binding, and the no-custom-matcher rule requires auditor judgment beyond manifest declaration. The mapping is partial because no single Constitution control captures the full breadth of MASVS-AUTH-2 — particularly the local-PIN edge case and apps that rely fully on local authentication without a remote endpoint — but the two-trace coverage substantively addresses the mechanism-correctness and liveness halves.",
+    "verification_guidance": {
+      "evidence_locator_types": [
+        "symbol_pattern",
+        "config_pattern",
+        "manifest_entry",
+        "dependency_declaration"
+      ],
+      "expected_evidence_patterns": [
+        "iOS: local authentication uses LocalAuthentication framework (LAContext) with explicit policy (deviceOwnerAuthenticationWithBiometrics or deviceOwnerAuthentication) — not custom biometric matching code",
+        "Android: local authentication uses androidx.biometric.BiometricPrompt with explicit authenticator constraints (BIOMETRIC_STRONG for high-assurance, DEVICE_CREDENTIAL fallback declared when accepted) — not custom fingerprint matching",
+        "Biometric-protected keys bound to authentication state: iOS uses Keychain access control flags (.biometryCurrentSet, .userPresence); Android uses Keystore setUserAuthenticationRequired(true) with optional setUserAuthenticationParameters",
+        "Local PIN (where used as fallback or sole mechanism) stored via platform key derivation (Keychain on iOS, EncryptedSharedPreferences or Keystore-derived material on Android) — not plaintext or custom hash",
+        "Lockout policy declared in security_manifest: max attempts before backoff, backoff duration, escalation to remote revocation where applicable",
+        "Apps that rely fully on local authentication (no remote endpoint) declare this posture in security_manifest with explicit acknowledgment of full device-side authentication burden"
+      ],
+      "failure_indicators": [
+        "Custom biometric matching code that processes raw biometric samples or templates outside the platform framework (loses secure-enclave protection, exposes biometric data)",
+        "iOS: biometric evaluation via deprecated APIs or without LAContext policy specification (policy ambiguity allows weak fallback)",
+        "Android: use of deprecated FingerprintManager directly instead of BiometricPrompt (FingerprintManager is deprecated in API 28+; BiometricPrompt is the platform-recommended API)",
+        "Biometric-protected sensitive operations not bound to a Keystore/Keychain key — biometric prompt success used as a boolean flag without cryptographic gating (vulnerable to runtime bypass via prompt-result spoofing on rooted/jailbroken devices)",
+        "Local PIN stored in UserDefaults on iOS or SharedPreferences without Jetpack Security on Android (plaintext exposure)",
+        "Local PIN compared via direct string equality without constant-time comparison (timing-attack surface)",
+        "No lockout policy — unlimited retry attempts allow brute-force enumeration of local PIN",
+        "Biometric success used to unlock sensitive data without re-derivation from a biometric-bound key — sensitive data decryptable independently of the biometric prompt"
+      ],
+      "false_positive_traps": [
+        "Local authentication handling inside test fixtures or test-only code paths (paths containing /test/, /tests/, /__tests__/, /spec/ OR functions/methods marked with @Test, @Ignore, @Disabled annotations). Test mocks legitimately stub biometric prompts; these are not production violations.",
+        "Use of biometricPrompt.authenticate(CryptoObject) on Android to bind biometric success to a Keystore key — this IS the correct pattern, not a violation; the CryptoObject binding is what makes the prompt cryptographically meaningful.",
+        "Apps that intentionally do NOT use biometrics (e.g., enterprise apps required to use device-credential-only authentication for compliance reasons) are not MASVS-AUTH-2 violations — the control applies when biometrics or local PIN ARE used. Manifest must declare the chosen mechanism explicitly.",
+        "Fallback to device-credential (PIN/pattern/password) authentication via DEVICE_CREDENTIAL authenticator (Android) or .deviceOwnerAuthentication policy (iOS) is NOT a violation — the platform manages the device-credential evaluation securely; the violation surface is custom credential evaluation, not platform-mediated fallback."
+      ]
+    },
+    "interpretation_review": {
+      "interpretation_authority": "intrinsic_code_internal_review",
+      "review_status": "pre_audit",
+      "external_review_type": "none",
+      "external_reviewer": null,
+      "external_review_date": null,
+      "external_review_scope": null
+    }
+  },
+
+  "standards_body_endorsement": {
+    "endorsed": false,
+    "endorsement_authority": null,
+    "endorsement_evidence_locator": null,
+    "endorsement_evidence_sha256": null,
+    "endorsement_evidence_public_accessibility": false,
+    "endorsement_date": null,
+    "endorsement_scope": null
+  },
+
+  "claim_boundaries": {
+    "allowed_claims": [
+      "uses Constitution Pillar 4 phishing-resistant authentication (SEC-PILLAR-4-PHISHING-RESISTANT-AUTH) as supporting evidence toward MASVS-AUTH-2 coverage on the local-biometric mechanism layer",
+      "uses Constitution Pillar 4 identity-verification discipline (SEC-PILLAR-4-IDENTITY-VERIFICATION) as supporting evidence toward MASVS-AUTH-2 coverage on the liveness-check layer where applicable",
+      "uses platform biometric frameworks (LocalAuthentication on iOS, BiometricPrompt on Android) for local authentication per MASVS-AUTH-2 platform-best-practice requirement"
+    ],
+    "softened_claims": [
+      "addresses MASVS-AUTH-2",
+      "aligned with MASVS-AUTH-2 local-authentication guidance"
+    ],
+    "forbidden_claims": [],
+    "requires_external_certification": false,
+    "claim_boundary_notes": "Standard-level baseline (from manifest.json.standard_claim_policy) already covers OWASP-wide forbidden claims. No requirement-specific additions needed for MASVS-AUTH-2. MASVS-AUTH-2 is mapped to two Constitution v0.5 traces in mapping file v1.2: SEC-PILLAR-4-PHISHING-RESISTANT-AUTH (supporting, local-biometric mechanism layer) and SEC-PILLAR-4-IDENTITY-VERIFICATION (supporting, liveness-check layer). Neither trace is strictly primary because Constitution treats local authentication as a deployment of phishing-resistant primitives rather than a discrete control; the partial-mapping label is honest about this. Claims about biometric template security, secure-enclave evaluation, and platform lockout policy are valid only when platform frameworks (LocalAuthentication / BiometricPrompt) are in use; custom biometric matchers forfeit these claims. Apps that rely fully on local authentication (no remote endpoint) carry additional risk surface beyond MASVS-AUTH-2's scope and may require complementary controls. Tier routing handled downstream by Reaper Conclave matrix; the listed Reaper auditors consume this requirement when invoked for the bundle's tier and surface."
+  },
+
+  "intrinsic_mapping": {
+    "constitution_versions": ["0.5"],
+    "constitutional_trace_ids": [
+      "SEC-PILLAR-4-PHISHING-RESISTANT-AUTH",
+      "SEC-PILLAR-4-IDENTITY-VERIFICATION"
+    ],
+    "receipt_fields": [
+      "external_standards_summary",
+      "constitutional_traces"
+    ],
+    "auditor_consumers": [
+      "file_standards_auditor",
+      "external_standards_mapping_auditor",
+      "reaper-auth",
+      "reaper-mobile",
+      "reaper-secrets"
+    ]
+  },
+
+  "lifecycle": {
+    "status": "active",
+    "supersedes": [],
+    "superseded_by": [],
+    "effective_date": "2024-01-18",
+    "withdrawn_date": null
+  },
+
+  "transcription_metadata": {
+    "corpus_version": "v0.1.0",
+    "transcribed_date": "2026-05-20"
+  }
+}
