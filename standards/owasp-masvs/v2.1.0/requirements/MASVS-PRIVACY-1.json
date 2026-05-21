@@ -1,0 +1,159 @@
+{
+  "standard_id": "MASVS-PRIVACY-1",
+
+  "normative_source": {
+    "standard_name": "OWASP Mobile Application Security Verification Standard",
+    "standard_version": "2.1.0",
+    "standard_version_date": "2024-01-18",
+    "source_section": "MASVS-PRIVACY: Privacy — MASVS-PRIVACY-1 (page 34)",
+    "source_locator": "https://mas.owasp.org/MASVS/controls/MASVS-PRIVACY-1/",
+    "requirement_title": "The app minimizes access to sensitive data and resources.",
+    "normative_excerpt": "Per OWASP MASVS v2.1.0 §MASVS-PRIVACY-1 (Description): Apps should only request access to the data they absolutely need for their functionality and always with informed consent from the user. This control ensures that apps practice data minimization and restricts access control, reducing the potential impact of data breaches or leaks.",
+    "normative_summary": "Mobile apps must practice data minimization at four layers: only request/collect data strictly necessary for declared functionality; obtain informed consent before collection; share data with third parties only when necessary and only after consent is confirmed (preventing third-party SDKs from collecting before consent or ignoring opt-out signals); and account for the SDK supply chain so no unnecessary data flows through transitive dependencies. Each data class collected must have explicit justification declared; each external processor must be declared with the data shared, justification, consent path, and retention policy.",
+    "verbatim_allowed": true,
+    "external_references": [
+      "https://mas.owasp.org/MASVS/controls/MASVS-PRIVACY-1/",
+      "https://mas.owasp.org/MASVS/11-MASVS-PRIVACY/",
+      "https://developer.apple.com/app-store/app-privacy-details/",
+      "https://support.google.com/googleplay/android-developer/answer/10787469"
+    ]
+  },
+
+  "source_rights": {
+    "license": "CC-BY-SA-4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "redistribution_allowed": true,
+    "public_archive_allowed": true,
+    "verbatim_excerpt_allowed": true,
+    "attribution_required": true,
+    "license_notes": "Source license recorded from the downloaded OWASP MASVS v2.1.0 PDF artifact. Live website may differ; this corpus pins the artifact license. Verbatim excerpts include attribution per CC-BY-SA-4.0 §3."
+  },
+
+  "source_integrity": {
+    "source_artifact_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
+    "transcription_input_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
+    "requirement_file_sha256": "36e4e6f62fe6a94ab851e8c0c4996995972b2a4a2cb087d8928a5f3222a1a626"
+  },
+
+  "applicability": {
+    "tier_floor": 2,
+    "conditions_logic": "all",
+    "conditions": [
+      {
+        "field": "security_manifest.app_tier",
+        "operator": ">=",
+        "value": 2
+      }
+    ],
+    "human_note": "Applies at Tier 2+ as a conservative corpus-level gate. Per Constitution Pillar 2 (Data & Identity Discipline), data minimization activates at Tier 2+ where the app handles content distribution and analytics; all three mapped traces (SEC-PILLAR-2-DATA-MINIMIZATION, SEC-PILLAR-2-RETENTION-POLICY, SEC-PILLAR-2-EXTERNAL-PROCESSOR-DECLARATION) are Tier 2-5 controls. The blueprint schema already declares data_retention_policies[] and external_processor_retention[] arrays per Constitution v0.5 (blueprint.schema.json:204 and :225 per PIPELINE_LANGUAGE §2.5); this requirement file documents the MASVS-PRIVACY-1 mapping against those existing fields. If a Tier 2+ app explicitly declares no sensitive-data collection (e.g., a fully-anonymous read-only utility), auditors may mark the requirement not-applicable during evidence review with documented justification in security_manifest. In practice every Intrinsic Code app at Tier 2+ requires data minimization discipline because content-distribution and analytics-bearing apps inherently collect or transmit user data that must be justified and consent-gated."
+  },
+
+  "intrinsic_interpretation": {
+    "interpretation_version": "1.0",
+    "mapping_strength": "partial",
+    "mapping_rationale": "Constitution Pillar 2 covers MASVS-PRIVACY-1 via one dedicated primary trace and two supporting traces. SEC-PILLAR-2-DATA-MINIMIZATION (primary) is the dedicated Constitutional control for data-minimization at the request/collect/transmit layer — every data class in data_retention_policies[] declares explicit justification for collection, and permission requests are just-in-time and justified. SEC-PILLAR-2-RETENTION-POLICY (supporting) covers the retention-duration minimization vector — minimizing how long collected data persists is part of the broader minimization discipline. SEC-PILLAR-2-EXTERNAL-PROCESSOR-DECLARATION (supporting) covers the third-party-sharing minimization vector — every external processor is declared with data shared, justification, consent path, and the processor's retention policy. The mapping is partial because PRIVACY-1's scope spans four substantive layers (request/collect minimization, consent-gating, third-party sharing minimization, SDK supply-chain accountability) and the three Constitution traces cover the first three substantively but SBOM/supply-chain accountability flows partially through SEC-PILLAR-3-SDK-PROVENANCE (Pillar 3, scoped to vendor evaluation) and partially remains auditor-evaluation surface. Implementation correctness for per-data-class justification quality, consent-flow ordering (consent before collection enforced cryptographically where possible), third-party SDK consent-signal propagation, and SBOM completeness requires auditor judgment beyond manifest declaration.",
+    "verification_guidance": {
+      "evidence_locator_types": [
+        "symbol_pattern",
+        "config_pattern",
+        "manifest_entry",
+        "dependency_declaration"
+      ],
+      "expected_evidence_patterns": [
+        "security_manifest.data_retention_policies[] declares each data class collected with: data_class, justification, retention_duration, deletion_trigger, local_or_remote_storage",
+        "security_manifest.external_processor_retention[] declares each external processor with: processor_name, data_shared, justification, consent_path, processor_retention_policy, opt_out_mechanism",
+        "iOS: Info.plist Privacy usage descriptions (NSCameraUsageDescription, NSLocationWhenInUseUsageDescription, NSContactsUsageDescription, etc.) present for every requested permission with user-meaningful justification strings",
+        "iOS: PrivacyInfo.xcprivacy manifest declares NSPrivacyAccessedAPITypes (required-reason API declarations) for all categories the app uses",
+        "Android: AndroidManifest.xml <uses-permission> declarations scoped to actually-used permissions; runtime permission requests are just-in-time at the point of feature use, not bulk-requested at app launch",
+        "Android: data safety section content (com.google.android.play.data-safety) declared and synchronized with security_manifest's data_retention_policies",
+        "Third-party SDKs initialized AFTER consent is captured for the data classes they collect; SDK consent-signal hooks (e.g., AppTrackingTransparency status on iOS, ConsentInformation on Android with Google UMP) gate SDK data flow",
+        "SBOM artifact (CycloneDX or SPDX format) generated at build time enumerating all dependencies; periodically reviewed for data-flow surfaces"
+      ],
+      "failure_indicators": [
+        "Permissions requested without corresponding declared data_retention_policies[] entry — privileged access without justification documented",
+        "Permissions requested bulk-at-launch rather than just-in-time at point of feature use — defeats data-minimization intent",
+        "iOS Info.plist usage descriptions present but generic ('App needs access to your data') — fails informed-consent quality bar",
+        "Third-party SDKs (analytics, crash reporting, ads) initialized at app launch BEFORE consent is captured — SDK collects before consent confirmed (the explicit pattern PRIVACY-1 calls out)",
+        "Consent dialog presented but SDK data flow continues when user declines — consent-signal not actually propagated to SDK initialization paths",
+        "External processors used but not declared in security_manifest.external_processor_retention — undeclared data-sharing surface",
+        "SDKs from supply chain that collect data not declared in the app's data_retention_policies — transitive collection without app-level accountability",
+        "No SBOM artifact generated — supply-chain visibility absent",
+        "iOS apps using required-reason APIs (NSPrivacyAccessedAPI categories) without declaring reasons in PrivacyInfo.xcprivacy — Apple submission rejection risk and consent-transparency failure"
+      ],
+      "false_positive_traps": [
+        "Data-collection handling inside test fixtures or test-only code paths (paths containing /test/, /tests/, /__tests__/, /spec/ OR functions/methods marked with @Test, @Ignore, @Disabled annotations). Test fixtures legitimately stub analytics SDKs; these are not production violations.",
+        "Permissions requested at launch for genuinely-launch-time-required features (e.g., notification permission for an alarm app, location permission for a navigation app whose primary launch flow requires location) are NOT violations as long as security_manifest declares the launch-time-required justification; just-in-time is the default, not the only valid pattern.",
+        "Apps that bundle but do not initialize an SDK until user-consent flow completes (SDK present in dependency tree but not active until consent captured) are NOT violations — supply-chain visibility through SBOM still required, but pre-consent dormancy is the correct pattern.",
+        "Data classes collected for legal-compliance reasons (e.g., transaction records required by financial regulation, audit logs required by HIPAA) are NOT violations of minimization as long as security_manifest declares the legal-basis justification and retention duration matches regulatory floor — minimization discipline includes a 'minimum required by law' floor.",
+        "Background data collection that the user genuinely cannot reasonably expect (per PRIVACY-3 disclosure scope) is a PRIVACY-3 transparency issue, not a PRIVACY-1 minimization issue, as long as the collection itself is justified and consent-gated."
+      ]
+    },
+    "interpretation_review": {
+      "interpretation_authority": "intrinsic_code_internal_review",
+      "review_status": "pre_audit",
+      "external_review_type": "none",
+      "external_reviewer": null,
+      "external_review_date": null,
+      "external_review_scope": null
+    }
+  },
+
+  "standards_body_endorsement": {
+    "endorsed": false,
+    "endorsement_authority": null,
+    "endorsement_evidence_locator": null,
+    "endorsement_evidence_sha256": null,
+    "endorsement_evidence_public_accessibility": false,
+    "endorsement_date": null,
+    "endorsement_scope": null
+  },
+
+  "claim_boundaries": {
+    "allowed_claims": [
+      "uses Constitution Pillar 2 data-minimization discipline (SEC-PILLAR-2-DATA-MINIMIZATION) as primary evidence toward MASVS-PRIVACY-1 coverage on the request/collect/transmit minimization vector",
+      "uses Constitution Pillar 2 retention-policy discipline (SEC-PILLAR-2-RETENTION-POLICY) as supporting evidence toward MASVS-PRIVACY-1 coverage on the retention-duration minimization vector",
+      "uses Constitution Pillar 2 external-processor-declaration discipline (SEC-PILLAR-2-EXTERNAL-PROCESSOR-DECLARATION) as supporting evidence toward MASVS-PRIVACY-1 coverage on the third-party-sharing minimization vector",
+      "declares data minimization posture in security_manifest.data_retention_policies and security_manifest.external_processor_retention per MASVS-PRIVACY-1 platform-best-practice requirement",
+      "gates third-party SDK initialization on user consent before SDK data flow begins, preventing the explicit anti-pattern PRIVACY-1 calls out"
+    ],
+    "softened_claims": [
+      "addresses MASVS-PRIVACY-1",
+      "aligned with MASVS-PRIVACY-1 data-minimization guidance"
+    ],
+    "forbidden_claims": [],
+    "requires_external_certification": false,
+    "claim_boundary_notes": "Standard-level baseline (from manifest.json.standard_claim_policy) already covers OWASP-wide forbidden claims. No requirement-specific additions needed for MASVS-PRIVACY-1. MASVS-PRIVACY-1 is mapped to three Constitution v0.5 traces in mapping file v1.2: SEC-PILLAR-2-DATA-MINIMIZATION (primary, dedicated minimization control) plus two supporting traces — SEC-PILLAR-2-RETENTION-POLICY (retention-duration vector) and SEC-PILLAR-2-EXTERNAL-PROCESSOR-DECLARATION (third-party-sharing vector). Claims about data minimization are valid only when the dedicated primary trace is implemented; supporting-trace evidence alone does not satisfy PRIVACY-1 because the dedicated DATA-MINIMIZATION semantics (just-in-time permission requests, per-data-class justification, consent-before-SDK-data-flow) are mandatory. SBOM / supply-chain accountability is partially covered by Pillar 3's SEC-PILLAR-3-SDK-PROVENANCE (vendor evaluation) but the SBOM-generation discipline itself remains auditor-evaluation surface. Out of scope: privacy assessments under GDPR / CCPA / other regulatory frameworks (DPIA / DPA review) — MASVS-PRIVACY explicitly disclaims being a substitute for these per the standard's IMPORTANT DISCLAIMER on page 33; PRIVACY-1 evidence informs but does not substitute for legal-compliance review. Tier routing handled downstream by Reaper Conclave matrix; the listed Reaper auditors consume this requirement when invoked for the bundle's tier and surface."
+  },
+
+  "intrinsic_mapping": {
+    "constitution_versions": ["0.5"],
+    "constitutional_trace_ids": [
+      "SEC-PILLAR-2-DATA-MINIMIZATION",
+      "SEC-PILLAR-2-RETENTION-POLICY",
+      "SEC-PILLAR-2-EXTERNAL-PROCESSOR-DECLARATION"
+    ],
+    "receipt_fields": [
+      "external_standards_summary",
+      "constitutional_traces"
+    ],
+    "auditor_consumers": [
+      "file_standards_auditor",
+      "external_standards_mapping_auditor",
+      "reaper-privacy",
+      "reaper-dependencies"
+    ]
+  },
+
+  "lifecycle": {
+    "status": "active",
+    "supersedes": [],
+    "superseded_by": [],
+    "effective_date": "2024-01-18",
+    "withdrawn_date": null
+  },
+
+  "transcription_metadata": {
+    "corpus_version": "v0.1.0",
+    "transcribed_date": "2026-05-20"
+  }
+}
