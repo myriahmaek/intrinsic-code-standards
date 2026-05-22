@@ -400,70 +400,70 @@ Top-level corpus file. Canonical list of every registered auditor that may appea
   "registered_auditors": [
     {
       "auditor_id": "file_standards_auditor",
-      "prompt_file": "prompts/file-standards-auditor-v0-1-rev2-1-prompt.md",
+      "prompt_file": "prompts/file-standards-auditor-prompt.md",
       "domain": "per-file constitutional trace + forbidden primitive scan",
       "status": "active",
       "promoted_to_active_date": "2026-05-09"
     },
     {
       "auditor_id": "file_implementation_auditor",
-      "prompt_file": "prompts/file-implementation-auditor-v0-1-rev2-1-prompt.md",
+      "prompt_file": "prompts/file-implementation-auditor-prompt.md",
       "domain": "per-file TODO completeness + NIAP attestation structure (Tier 5)",
       "status": "active",
       "promoted_to_active_date": "2026-05-09"
     },
     {
       "auditor_id": "reaper-auth",
-      "prompt_file": "prompts/reaper-auth-v0-1-prompt.md",
+      "prompt_file": "prompts/reaper-auth-prompt.md",
       "domain": "adversarial audit of authentication and authorization",
       "status": "active",
       "promoted_to_active_date": "2026-05-10"
     },
     {
       "auditor_id": "reaper-privacy",
-      "prompt_file": "prompts/reaper-privacy-v0-1-prompt.md",
+      "prompt_file": "prompts/reaper-privacy-prompt.md",
       "domain": "adversarial audit of privacy, data handling, and PII",
       "status": "active",
       "promoted_to_active_date": "2026-05-10"
     },
     {
       "auditor_id": "reaper-secrets",
-      "prompt_file": "prompts/reaper-secrets-v0-1-prompt.md",
+      "prompt_file": "prompts/reaper-secrets-prompt.md",
       "domain": "adversarial audit of secret handling and key management",
       "status": "active",
       "promoted_to_active_date": "2026-05-10"
     },
     {
       "auditor_id": "reaper-mobile",
-      "prompt_file": "prompts/reaper-mobile-v0-1-prompt.md",
+      "prompt_file": "prompts/reaper-mobile-prompt.md",
       "domain": "adversarial audit of mobile platform attack surface",
       "status": "active",
       "promoted_to_active_date": "2026-05-10"
     },
     {
       "auditor_id": "reaper-input",
-      "prompt_file": "prompts/reaper-input-v0-1-prompt.md",
+      "prompt_file": "prompts/reaper-input-prompt.md",
       "domain": "adversarial audit of input validation and untrusted data",
       "status": "active",
       "promoted_to_active_date": "2026-05-10"
     },
     {
       "auditor_id": "reaper-dependencies",
-      "prompt_file": "prompts/reaper-dependencies-v0-1-prompt.md",
+      "prompt_file": "prompts/reaper-dependencies-prompt.md",
       "domain": "adversarial audit of third-party dependencies",
       "status": "active",
       "promoted_to_active_date": "2026-05-10"
     },
     {
       "auditor_id": "reaper-crypto",
-      "prompt_file": "prompts/reaper-crypto-v0-1-prompt.md",
+      "prompt_file": "prompts/reaper-crypto-prompt.md",
       "domain": "adversarial audit of cryptographic primitives",
       "status": "active",
       "promoted_to_active_date": "2026-05-10"
     },
     {
       "auditor_id": "reaper-compliance",
-      "prompt_file": "prompts/reaper-compliance-v0-1-prompt.md",
+      "prompt_file": "prompts/reaper-compliance-prompt.md",
       "domain": "adversarial audit of regulatory compliance posture (Tier 4-5)",
       "status": "active",
       "promoted_to_active_date": "2026-05-10"
