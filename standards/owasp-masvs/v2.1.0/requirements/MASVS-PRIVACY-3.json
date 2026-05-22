@@ -32,7 +32,7 @@
   "source_integrity": {
     "source_artifact_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
     "transcription_input_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
-    "requirement_file_sha256": "d9a93e8d089595e1fe793d286dd421db5ce6d570ac711f49d8cc42d222810df7"
+    "requirement_file_sha256": "95403b1507eaedb7542f941b1bde2612dd1ea8a9fa343ed10b15fa69ddf0305e"
   },
 
   "applicability": {
@@ -40,12 +40,12 @@
     "conditions_logic": "all",
     "conditions": [
       {
-        "field": "security_manifest.app_tier",
-        "operator": ">=",
-        "value": 2
+        "field": "security_manifest.external_processor_surfaces",
+        "operator": "!=",
+        "value": []
       }
     ],
-    "human_note": "Applies at Tier 2+ as a conservative corpus-level gate. Per Constitution Pillars 2 and 7, transparency activates at Tier 2+ where the app handles content distribution and analytics; the three mapped traces are SEC-PILLAR-2-EXTERNAL-PROCESSOR-DECLARATION (Tier 2-5), SEC-PILLAR-2-AI-TRANSPARENCY (Tier 2-5, conditional on AI processor presence), and SEC-PILLAR-7-LAST-MILE-COMPLIANCE (Tier 1-5, includes Privacy Nutrition Label / Data Safety section). The blueprint schema declares external_processor_retention[] (blueprint.schema.json:225), ai_transparency (blueprint.schema.json:314), and last_mile_gates (blueprint.schema.json:260) per Constitution v0.5; this requirement file documents the MASVS-PRIVACY-3 mapping against those existing fields. If a Tier 2+ app collects no user data whatsoever (e.g., a fully-anonymous read-only utility), auditors may mark the requirement not-applicable during evidence review with documented justification. In practice every Intrinsic Code app at Tier 2+ requires transparency disclosures because Apple App Privacy Details and Google Play Data Safety declarations are platform-store submission surfaces whenever the app collects, uses, shares, or links user data."
+    "human_note": "Applies at Tier 2+ as a conservative corpus-level gate. Per Constitution Pillars 2 and 7, transparency activates at Tier 2+ where the app handles content distribution and analytics; the three mapped traces are SEC-PILLAR-2-EXTERNAL-PROCESSOR-DECLARATION (Tier 2-5), SEC-PILLAR-2-AI-TRANSPARENCY (Tier 2-5, conditional on AI processor presence), and SEC-PILLAR-7-LAST-MILE-COMPLIANCE (Tier 1-5, includes Privacy Nutrition Label / Data Safety section). The blueprint schema declares external_processor_retention[] (blueprint.schema.json:225), ai_transparency (blueprint.schema.json:314), and last_mile_gates (blueprint.schema.json:260) per Constitution v0.5; this requirement file documents the MASVS-PRIVACY-3 mapping against those existing fields. If a Tier 2+ app collects no user data whatsoever (e.g., a fully-anonymous read-only utility), auditors may mark the requirement not-applicable during evidence review with documented justification. In practice every Intrinsic Code app at Tier 2+ requires transparency disclosures because Apple App Privacy Details and Google Play Data Safety declarations are platform-store submission surfaces whenever the app collects, uses, shares, or links user data.\n\n**Phase 5 migration (2026-05-21):** Applicability condition migrated to a direct-field check on the per-surface evidence array that backs this control. The new condition asks whether the app actually declares the surface this control governs, replacing the prior tier-or-auth-flow proxy. tier_floor stays unchanged as the universal-floor backstop. References Phase 1 schema addition (commit `9ad9b6c`), Phase 4 applicability evaluator (commit `37ce03d`), and Phase 4.5 evaluator `==` operator extension (Phase 5 commit)."
   },
 
   "intrinsic_interpretation": {

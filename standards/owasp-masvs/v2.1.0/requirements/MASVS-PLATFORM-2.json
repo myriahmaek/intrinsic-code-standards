@@ -34,7 +34,7 @@
   "source_integrity": {
     "source_artifact_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
     "transcription_input_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
-    "requirement_file_sha256": "79bbed48c0bfd38d952252eb46e8dc7af1218f5774ddd11cab8cedc2053b16b4"
+    "requirement_file_sha256": "4d5a36c56a5e70705a680f008f1cd5caa57db5ea007af91d2f4b6d62f47f1d13"
   },
 
   "applicability": {
@@ -42,12 +42,17 @@
     "conditions_logic": "all",
     "conditions": [
       {
-        "field": "security_manifest.app_tier",
-        "operator": ">=",
-        "value": 2
+        "field": "security_manifest.webview_discipline.status",
+        "operator": "==",
+        "value": "active"
+      },
+      {
+        "field": "security_manifest.webview_discipline.webview_surfaces",
+        "operator": "!=",
+        "value": []
       }
     ],
-    "human_note": "Applies to every Tier 2+ app that embeds WebViews. Per Constitution Pillar 5 (Secure Architecture & Runtime), WebView discipline activates at Tier 2+ where the app handles content distribution and analytics. The blueprint schema does not declare a discrete WebView-usage boolean at the technical layer because security_manifest.webview_discipline is the per-app declaration block (present at Tier 2+ per the existing schema); apps that don't embed WebViews declare an empty/no-webview posture there. The tier-floor applicability is the honest proxy until the schema gains a precise webview-presence field. In practice every Intrinsic Code app at Tier 2+ that embeds WebViews uses WKWebView on iOS or WebView on Android because in-app browsers, OAuth flows, and licensed-content rendering are baseline Tier 2+ surfaces."
+    "human_note": "Applies to every Tier 2+ app that embeds WebViews. Per Constitution Pillar 5 (Secure Architecture & Runtime), WebView discipline activates at Tier 2+ where the app handles content distribution and analytics. The blueprint schema does not declare a discrete WebView-usage boolean at the technical layer because security_manifest.webview_discipline is the per-app declaration block (present at Tier 2+ per the existing schema); apps that don't embed WebViews declare an empty/no-webview posture there. The tier-floor applicability is the honest proxy until the schema gains a precise webview-presence field. In practice every Intrinsic Code app at Tier 2+ that embeds WebViews uses WKWebView on iOS or WebView on Android because in-app browsers, OAuth flows, and licensed-content rendering are baseline Tier 2+ surfaces.\n\n**Phase 5 migration (2026-05-21):** Applicability condition migrated to a direct-field check on the per-surface evidence array that backs this control. The new condition asks whether the app actually declares the surface this control governs, replacing the prior tier-or-auth-flow proxy. tier_floor stays unchanged as the universal-floor backstop. References Phase 1 schema addition (commit `9ad9b6c`), Phase 4 applicability evaluator (commit `37ce03d`), and Phase 4.5 evaluator `==` operator extension (Phase 5 commit)."
   },
 
   "intrinsic_interpretation": {

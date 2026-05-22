@@ -34,7 +34,7 @@
   "source_integrity": {
     "source_artifact_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
     "transcription_input_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
-    "requirement_file_sha256": "bacd45e14a4b284be055636585f67f315e7f6aef9604e18a40eef78a8c7f0a5c"
+    "requirement_file_sha256": "46e39dbb32033717be9179da84bb1415cca7bf0d35544789777f1ef149e1cf7d"
   },
 
   "applicability": {
@@ -42,12 +42,17 @@
     "conditions_logic": "all",
     "conditions": [
       {
-        "field": "security_manifest.app_tier",
-        "operator": ">=",
-        "value": 2
+        "field": "security_manifest.ui_integrity.status",
+        "operator": "==",
+        "value": "active"
+      },
+      {
+        "field": "security_manifest.ui_integrity.sensitive_ui_surfaces",
+        "operator": "!=",
+        "value": []
       }
     ],
-    "human_note": "Applies to every Tier 2+ app that displays sensitive content in its UI. Per Constitution Pillar 5 (Secure Architecture & Runtime), UI integrity discipline activates at Tier 2+ where the app handles content distribution and analytics; security_manifest.ui_integrity is the per-app declaration block (present at Tier 2+ per the existing schema). The blueprint schema does not declare a discrete sensitive-UI-content boolean because virtually every Tier 2+ app displays content the user would not want exposed in app-switcher previews or shoulder-surfed (private posts, account balances, partial card numbers, notification content). The tier-floor applicability is the honest proxy until the schema gains a precise sensitive-UI-surface field. In practice every Intrinsic Code app at Tier 2+ displays sensitive content because account state, private messages, and personalized content are baseline Tier 2+ surfaces."
+    "human_note": "Applies to every Tier 2+ app that displays sensitive content in its UI. Per Constitution Pillar 5 (Secure Architecture & Runtime), UI integrity discipline activates at Tier 2+ where the app handles content distribution and analytics; security_manifest.ui_integrity is the per-app declaration block (present at Tier 2+ per the existing schema). The blueprint schema does not declare a discrete sensitive-UI-content boolean because virtually every Tier 2+ app displays content the user would not want exposed in app-switcher previews or shoulder-surfed (private posts, account balances, partial card numbers, notification content). The tier-floor applicability is the honest proxy until the schema gains a precise sensitive-UI-surface field. In practice every Intrinsic Code app at Tier 2+ displays sensitive content because account state, private messages, and personalized content are baseline Tier 2+ surfaces.\n\n**Phase 5 migration (2026-05-21):** Applicability condition migrated to a direct-field check on the per-surface evidence array that backs this control. The new condition asks whether the app actually declares the surface this control governs, replacing the prior tier-or-auth-flow proxy. tier_floor stays unchanged as the universal-floor backstop. References Phase 1 schema addition (commit `9ad9b6c`), Phase 4 applicability evaluator (commit `37ce03d`), and Phase 4.5 evaluator `==` operator extension (Phase 5 commit)."
   },
 
   "intrinsic_interpretation": {

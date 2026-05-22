@@ -32,7 +32,7 @@
   "source_integrity": {
     "source_artifact_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
     "transcription_input_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
-    "requirement_file_sha256": "076e61ada14b2704487dffc6f6df8795015f91360f1d49417352b69666f2ed4f"
+    "requirement_file_sha256": "550e3badb94a00856dd903005df663bc77a0d35f2e8baa010cb4982d8928ec00"
   },
 
   "applicability": {
@@ -40,12 +40,12 @@
     "conditions_logic": "all",
     "conditions": [
       {
-        "field": "technical.auth_flow",
+        "field": "security_manifest.sensitive_operations",
         "operator": "!=",
-        "value": "none"
+        "value": []
       }
     ],
-    "human_note": "Applies to every app that declares an authentication flow (technical.auth_flow != \"none\") AND performs sensitive operations beyond initial session login. Per Constitution Pillar 4 (Authentication & Identity), step-up authentication activates at Tier 3+ where the app handles user authentication and private user-to-user content; sensitive-operation boundaries (payment authorization, account changes, data export, privileged actions, key material access) are declared in security_manifest. The blueprint schema does not declare a discrete \"sensitive_operations\" field at the technical layer because sensitive-operation boundaries are part of security_manifest's per-app declaration rather than a fixed schema enumeration; the applicability filter at tier 3+ with auth_flow != \"none\" catches the universe of apps for which AUTH-3 is meaningful. Apps with no authentication (technical.auth_flow == \"none\") are formally inapplicable. In practice every Intrinsic Code app at Tier 3+ has sensitive operations beyond initial login because payment, account-change, data-export, or privileged-action surfaces are baseline at Tier 3+."
+    "human_note": "Applies to every app that declares an authentication flow (technical.auth_flow != \"none\") AND performs sensitive operations beyond initial session login. Per Constitution Pillar 4 (Authentication & Identity), step-up authentication activates at Tier 3+ where the app handles user authentication and private user-to-user content; sensitive-operation boundaries (payment authorization, account changes, data export, privileged actions, key material access) are declared in security_manifest. The blueprint schema does not declare a discrete \"sensitive_operations\" field at the technical layer because sensitive-operation boundaries are part of security_manifest's per-app declaration rather than a fixed schema enumeration; the applicability filter at tier 3+ with auth_flow != \"none\" catches the universe of apps for which AUTH-3 is meaningful. Apps with no authentication (technical.auth_flow == \"none\") are formally inapplicable. In practice every Intrinsic Code app at Tier 3+ has sensitive operations beyond initial login because payment, account-change, data-export, or privileged-action surfaces are baseline at Tier 3+.\n\n**Phase 5 migration (2026-05-21):** Applicability condition migrated to a direct-field check on the per-surface evidence array that backs this control. The new condition asks whether the app actually declares the surface this control governs, replacing the prior tier-or-auth-flow proxy. tier_floor stays unchanged as the universal-floor backstop. References Phase 1 schema addition (commit `9ad9b6c`), Phase 4 applicability evaluator (commit `37ce03d`), and Phase 4.5 evaluator `==` operator extension (Phase 5 commit)."
   },
 
   "intrinsic_interpretation": {

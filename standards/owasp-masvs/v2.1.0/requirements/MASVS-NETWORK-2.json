@@ -32,7 +32,7 @@
   "source_integrity": {
     "source_artifact_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
     "transcription_input_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
-    "requirement_file_sha256": "6dc1dad27758e0da62417237dae65db0064bb97926dba666429aadd764bd016e"
+    "requirement_file_sha256": "705e789775515edbf1ee9a8ca7dab981e0de8f809f200707b0b6175e2e26066a"
   },
 
   "applicability": {
@@ -40,12 +40,12 @@
     "conditions_logic": "all",
     "conditions": [
       {
-        "field": "security_manifest.app_tier",
-        "operator": ">=",
-        "value": 4
+        "field": "security_manifest.developer_controlled_endpoints",
+        "operator": "!=",
+        "value": []
       }
     ],
-    "human_note": "Applies at Tier 4+ per Constitution Pillar 5 (Secure Architecture & Runtime). SEC-PILLAR-5-CERTIFICATE-PINNING is a Tier 4-5 control because identity pinning becomes a hard requirement at high-assurance tiers (financial, regulated, enterprise-grade apps) where the cost of a CA compromise outweighs the operational burden of pin rotation. At Tier 1-3, MASVS-NETWORK-1's baseline TLS discipline (platform-default trust store with secure-transport enforcement) is sufficient; pinning is optional and the operational risk of bricking via pin staleness exceeds the marginal security gain. The blueprint schema does not declare a discrete network-presence field; the tier-4-floor applicability is enforced via the app_tier check. In practice every Intrinsic Code Tier 4+ app performs network communication with developer-controlled backends because cloud sync, authentication, telemetry, or content delivery are baseline."
+    "human_note": "Applies at Tier 4+ per Constitution Pillar 5 (Secure Architecture & Runtime). SEC-PILLAR-5-CERTIFICATE-PINNING is a Tier 4-5 control because identity pinning becomes a hard requirement at high-assurance tiers (financial, regulated, enterprise-grade apps) where the cost of a CA compromise outweighs the operational burden of pin rotation. At Tier 1-3, MASVS-NETWORK-1's baseline TLS discipline (platform-default trust store with secure-transport enforcement) is sufficient; pinning is optional and the operational risk of bricking via pin staleness exceeds the marginal security gain. The blueprint schema does not declare a discrete network-presence field; the tier-4-floor applicability is enforced via the app_tier check. In practice every Intrinsic Code Tier 4+ app performs network communication with developer-controlled backends because cloud sync, authentication, telemetry, or content delivery are baseline.\n\n**Phase 5 migration (2026-05-21):** Applicability condition migrated to a direct-field check on the per-surface evidence array that backs this control. The new condition asks whether the app actually declares the surface this control governs, replacing the prior tier-or-auth-flow proxy. tier_floor stays unchanged as the universal-floor backstop. References Phase 1 schema addition (commit `9ad9b6c`), Phase 4 applicability evaluator (commit `37ce03d`), and Phase 4.5 evaluator `==` operator extension (Phase 5 commit)."
   },
 
   "intrinsic_interpretation": {
