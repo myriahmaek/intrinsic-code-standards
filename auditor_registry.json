@@ -81,10 +81,10 @@
     },
     {
       "auditor_id": "build_integrity_auditor",
-      "prompt_file": "prompts/build-integrity-auditor-v0-1-prompt.md",
+      "prompt_file": "prompts/build-integrity-auditor-prompt.md",
       "domain": "post-Reaper build system completeness + dead code",
-      "status": "planned",
-      "planned_since_date": "2026-05-19"
+      "status": "active",
+      "promoted_to_active_date": "2026-05-26"
     },
     {
       "auditor_id": "external_standards_mapping_auditor",
