@@ -74,10 +74,10 @@
     },
     {
       "auditor_id": "bundle_coherence_auditor",
-      "prompt_file": "prompts/bundle-coherence-auditor-v0-1-prompt.md",
+      "prompt_file": "prompts/bundle-coherence-auditor-prompt.md",
       "domain": "post-Reaper bundle coherence + Receipt section integrity",
-      "status": "planned",
-      "planned_since_date": "2026-05-19"
+      "status": "active",
+      "promoted_to_active_date": "2026-05-26"
     },
     {
       "auditor_id": "build_integrity_auditor",
