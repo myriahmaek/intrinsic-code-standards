@@ -88,10 +88,10 @@
     },
     {
       "auditor_id": "external_standards_mapping_auditor",
-      "prompt_file": "prompts/external-standards-mapping-auditor-v0-1-prompt.md",
+      "prompt_file": "prompts/external-standards-mapping-auditor-prompt.md",
       "domain": "post-Reaper external standards mapping verification",
-      "status": "planned",
-      "planned_since_date": "2026-05-19"
+      "status": "active",
+      "promoted_to_active_date": "2026-05-26"
     },
     {
       "auditor_id": "cross_file_consistency_auditor",
