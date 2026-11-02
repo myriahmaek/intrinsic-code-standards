@@ -29,7 +29,7 @@ Single canonical document. Integrates the v0.1.3 patch into the locked rev3 base
 ### Additions in v0.1.3
 
 1. **`standard_claim_policy` block added to per-standard `manifest.json`** (§4). Standard-wide claim posture lives at manifest level; requirements inherit and may add (not un-forbid).
-2. **Three-tier inheritance for claim enforcement** (§5): corpus baseline → standard baseline → requirement-specific. Aggregator computes effective claim policy as union of all three.
+2. **Three-level inheritance for claim enforcement** (§5): corpus baseline → standard baseline → requirement-specific. Aggregator computes effective claim policy as union of all three.
 3. **`certification_disclaimer_present` boolean** in `standard_claim_policy` enables deterministic LOAD-14 enforcement without implicit conditions.
 4. **LOAD-14 standard claim policy consistency check** (§9). Catches missing disclaimer text when disclaimer is declared present; catches endorsement claims for standards whose body doesn't certify.
 
@@ -46,7 +46,7 @@ The corpus exists so that:
 1. **Compliance claims are verifiable.** Every signed Validation Receipt cites specific standard requirements from this corpus. External auditors and certification bodies can reproduce audit conditions by reading the same corpus version the factory used.
 2. **The factory is model-agnostic.** No LLM has to recall standards from training. Every audit reads requirement text directly from the corpus.
 3. **Compliance is proactive, not reactive.** Curated and signed off before audits run.
-4. **Claim boundaries are enforced as data, deterministically.** Python enforces; models cannot bypass via paraphrase. Three-tier inheritance (corpus → standard → requirement) keeps standard-wide posture out of per-requirement boilerplate.
+4. **Claim boundaries are enforced as data, deterministically.** Python enforces; models cannot bypass via paraphrase. Three-level inheritance (corpus → standard → requirement) keeps standard-wide posture out of per-requirement boilerplate.
 5. **Trust claims cannot be self-anointed.** Standards body endorsement requires evidence; no boolean stands alone. Standards whose bodies don't certify can't have requirements claiming endorsement.
 6. **Copyright safety is enforced at corpus load.** License terms are data; the loader refuses to load restricted-license content into public-archive standards.
 
@@ -121,7 +121,6 @@ Every requirement file is a single JSON object matching this schema. All fields 
   },
 
   "applicability": {
-    "tier_floor": "integer — 1-5",
     "conditions_logic": "string — 'all' (AND) or 'any' (OR)",
     "conditions": [
       {
@@ -212,7 +211,7 @@ Additional rule (new in v0.1.3, enforced by LOAD-14): if the parent standard's `
 
 **`interpretation_review.external_review_type`** — uses `"none"` when `review_status: "pre_audit"`. Replaces ambiguous null. `"standards_body_endorsement"` is NOT in this enum.
 
-**`claim_boundaries`** — per-requirement claim language rules. **Adds to** standard-level (`manifest.json.standard_claim_policy.*`) and corpus-level (`claim_policy.json`) baselines via three-tier inheritance. Cannot un-forbid claims forbidden at standard or corpus level.
+**`claim_boundaries`** — per-requirement claim language rules. **Adds to** standard-level (`manifest.json.standard_claim_policy.*`) and corpus-level (`claim_policy.json`) baselines via three-level inheritance. Cannot un-forbid claims forbidden at standard or corpus level.
 
 **`applicability.conditions[]`** — every `field` is a dotted path validated against the blueprint JSON schema. Corpus load FAILS on unresolvable paths.
 
@@ -291,7 +290,7 @@ At factory preprocessor time and at aggregator enforcement time, the effective c
 
 **Effective softened_claims** = `claim_policy.json.baseline_softened_claims` ∪ `manifest.json.standard_claim_policy.standard_baseline_softened_claims` ∪ `requirement.claim_boundaries.softened_claims`
 
-Three tiers: corpus → standard → requirement. Each tier adds; nothing overrides downward. A forbidden claim at corpus or standard level stays forbidden everywhere; per-requirement entries cannot un-forbid.
+Three levels: corpus → standard → requirement. Each level adds; nothing overrides downward. A forbidden claim at corpus or standard level stays forbidden everywhere; per-requirement entries cannot un-forbid.
 
 ---
 
@@ -371,7 +370,7 @@ Top-level corpus file. Read by Python aggregator at signing time. Curated by fou
     "bundle_audit_review.*",
     "external_standards_review.*"
   ],
-  "policy_notes": "Python aggregator enforces deterministically via string match (corpus baseline_forbidden_claims + every applicable standard's standard_baseline_forbidden_claims + every cited requirement's claim_boundaries.forbidden_claims) AND regex match (baseline_forbidden_patterns) on every text field listed in enforcement_scope. Model-internal thinking and logs are exempt. Three-tier inheritance: corpus → standard → requirement. Models may flag advisory concerns; only Python blocks signing. Corpus loader runs every entry in test_cases at load time; mismatch fails load."
+  "policy_notes": "Python aggregator enforces deterministically via string match (corpus baseline_forbidden_claims + every applicable standard's standard_baseline_forbidden_claims + every cited requirement's claim_boundaries.forbidden_claims) AND regex match (baseline_forbidden_patterns) on every text field listed in enforcement_scope. Model-internal thinking and logs are exempt. Three-level inheritance: corpus → standard → requirement. Models may flag advisory concerns; only Python blocks signing. Corpus loader runs every entry in test_cases at load time; mismatch fails load."
 }
 ```
 
@@ -380,7 +379,7 @@ Top-level corpus file. Read by Python aggregator at signing time. Curated by fou
 At signing time, the Python aggregator:
 
 1. Collects every text field listed in `enforcement_scope` from the bundle audit output that will appear in the Receipt.
-2. Computes effective forbidden list = corpus baseline ∪ all applicable standards' baselines ∪ all cited requirements' forbidden_claims (three-tier union).
+2. Computes effective forbidden list = corpus baseline ∪ all applicable standards' baselines ∪ all cited requirements' forbidden_claims (three-level union).
 3. Runs case-insensitive substring match against the effective forbidden list.
 4. Runs regex match against `baseline_forbidden_patterns`.
 5. ANY match → verdict `fail` with reason `claim_boundary_violation`; Receipt is NOT signed at production grade.
@@ -408,7 +407,7 @@ Top-level corpus file. Canonical list of every registered auditor that may appea
     {
       "auditor_id": "file_implementation_auditor",
       "prompt_file": "prompts/file-implementation-auditor-prompt.md",
-      "domain": "per-file TODO completeness + NIAP attestation structure (Tier 5)",
+      "domain": "per-file TODO completeness + NIAP attestation structure",
       "status": "active",
       "promoted_to_active_date": "2026-05-09"
     },
@@ -464,7 +463,7 @@ Top-level corpus file. Canonical list of every registered auditor that may appea
     {
       "auditor_id": "reaper-compliance",
       "prompt_file": "prompts/reaper-compliance-prompt.md",
-      "domain": "adversarial audit of regulatory compliance posture (Tier 4-5)",
+      "domain": "adversarial audit of regulatory compliance posture",
       "status": "active",
       "promoted_to_active_date": "2026-05-10"
     },
@@ -543,13 +542,13 @@ Root-level file tracking the whole corpus state.
       "status": "not_transcribed",
       "current_version": null,
       "verified_at": null,
-      "reason": "Tier 4 dependency"
+      "reason": "Planned standard; not in the corpus yet"
     },
     "HIPAA": {
       "status": "not_transcribed",
       "current_version": null,
       "verified_at": null,
-      "reason": "Tier 4 dependency"
+      "reason": "Planned standard; not in the corpus yet"
     }
   },
   "review_cadence_days": 90,
@@ -577,7 +576,7 @@ Root-level file tracking the whole corpus state.
 8. Load requirement files: `standards/{prefix-lowercased}/v{version}/requirements/{standard_id}.json`.
 9. Evaluate `applicability.conditions[]` deterministically against the bundle blueprint. Inapplicable requirements skipped with `not_applicable`.
 10. For applicable requirements, extract relevant fields and feed into External Standards Mapping Auditor's input.
-11. After auditor runs, Python aggregator computes effective forbidden_claims via three-tier inheritance and enforces deterministically on scoped fields per §5.
+11. After auditor runs, Python aggregator computes effective forbidden_claims via three-level inheritance and enforces deterministically on scoped fields per §5.
 12. Record corpus_version, policy_version, and standard_claim_policy versions in Receipt's standards manifest preprocessor output.
 
 ### External auditor
@@ -698,7 +697,7 @@ Corpus is append-only at commit level. Errata = version forward, never edit back
 - Factory implementation guidance for code generation (lives in factory prompts and Constitution)
 - AI-generated commentary beyond schema fields
 - Vendor-specific advisory content (only normative requirements; advisory lives in `external_references`)
-- Forbidden claim language presented as allowed (three-tier inheritance enforced at signing)
+- Forbidden claim language presented as allowed (three-level inheritance enforced at signing)
 - Endorsement claims without evidence (LOAD-5 + LOAD-14 enforced)
 - Restricted normative text in the public repo (LOAD-13 enforced)
 - Per-requirement duplication of standard-wide claim posture (manifest `standard_claim_policy` inheritance enforced)
@@ -716,7 +715,7 @@ Corpus is append-only at commit level. Errata = version forward, never edit back
 | Standards body publishes revision; corpus out of date | Quarterly review surfaces |
 | AIs disagree during transcription | Founder resolves; resolution in commit history |
 | Source becomes unavailable | Source archive (public or private) preserves; hash enables external verification |
-| Factory emits forbidden claim language | Aggregator deterministic enforcement on scoped fields with three-tier inheritance blocks signing |
+| Factory emits forbidden claim language | Aggregator deterministic enforcement on scoped fields with three-level inheritance blocks signing |
 | Endorsement claimed without evidence | LOAD-5 failure |
 | Endorsement claimed for non-certifying body | LOAD-14 failure |
 | Disclaimer declared present but text missing | LOAD-14 failure |
@@ -748,7 +747,7 @@ Every Receipt records corpus version used. Pulling at that commit reproduces aud
 
 ## 14. Operating principle
 
-> The corpus governs what the factory CAN claim. Forbidden language is data, enforced via three-tier inheritance. Endorsement defaults to false and requires evidence. Source is license-aware. Interpretation is versioned independently from source. Audit conditions are commit-pinned. Trust claims cannot be self-anointed. Copyright is enforced at corpus load. Standard-wide claim posture lives once at the manifest level, not 24 times across requirement files.
+> The corpus governs what the factory CAN claim. Forbidden language is data, enforced via three-level inheritance. Endorsement defaults to false and requires evidence. Source is license-aware. Interpretation is versioned independently from source. Audit conditions are commit-pinned. Trust claims cannot be self-anointed. Copyright is enforced at corpus load. Standard-wide claim posture lives once at the manifest level, not 24 times across requirement files.
 
 This is the moat.
 

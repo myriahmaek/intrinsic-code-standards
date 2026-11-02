@@ -32,20 +32,13 @@
   "source_integrity": {
     "source_artifact_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
     "transcription_input_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
-    "requirement_file_sha256": "547e7701a6fc3ab7d7a6b73aaa165af5f78d95b9c119ff82c5f8d25ed32d7d9e"
+    "requirement_file_sha256": "b5e3ea39c8f7010329b99eadbb42f875a2ab6bf5d8cd6362fe004b8ae42d8ebc"
   },
 
   "applicability": {
-    "tier_floor": 3,
     "conditions_logic": "all",
-    "conditions": [
-      {
-        "field": "security_manifest.app_tier",
-        "operator": ">=",
-        "value": 3
-      }
-    ],
-    "human_note": "Applies at Tier 3+ as a conservative corpus-level gate. Per Constitution Pillar 5 (Secure Architecture & Runtime), platform integrity validation activates at Tier 3+ where the app handles user authentication and private user-to-user content; both Constitution traces (SEC-PILLAR-5-JAILBREAK-DETECTION and SEC-PILLAR-5-PLATFORM-ATTESTATION) are Tier 3-5 controls. The blueprint schema does not currently declare a discrete platform-integrity-required field, so security_manifest.app_tier >= 3 is used as a broad proxy. If a Tier 3+ app explicitly accepts the threat-model risk of running on tampered platforms (e.g., an internal-only build with documented exception), auditors may mark the requirement not-applicable during evidence review with documented justification in security_manifest. In practice every Intrinsic Code app at Tier 3+ requires platform integrity validation because secure storage, biometric authentication, and sandbox enforcement depend on an untampered OS."
+    "conditions": [],
+    "human_note": "Applies unconditionally (Constitution §9; Part II B6 for the banking lane). Per Constitution Pillar 5 (Secure Architecture & Runtime), platform integrity validation is realized through SEC-PILLAR-5-JAILBREAK-DETECTION and SEC-PILLAR-5-PLATFORM-ATTESTATION, because secure storage, biometric authentication, and sandbox enforcement depend on an untampered OS."
   },
 
   "intrinsic_interpretation": {
@@ -116,7 +109,7 @@
     ],
     "forbidden_claims": [],
     "requires_external_certification": false,
-    "claim_boundary_notes": "Standard-level baseline (from manifest.json.standard_claim_policy) already covers OWASP-wide forbidden claims. No requirement-specific additions needed for MASVS-RESILIENCE-1. MASVS-RESILIENCE-1 is mapped to two Constitution v0.5 traces in mapping file v1.2: SEC-PILLAR-5-JAILBREAK-DETECTION (primary, heuristic detection layer) and SEC-PILLAR-5-PLATFORM-ATTESTATION (primary, cryptographic attestation layer). Both are labeled primary because RESILIENCE-1's scope distributes across two separable validation strategies; the partial-mapping label is honest about this. Claims about platform integrity validation depend on the chosen mechanism — heuristic detection claims require multi-check coverage with cryptographic gating; attestation claims require server-side token verification with nonce/replay-window discipline. Defense-in-depth: RESILIENCE-1 protections become more credible when combined with RESILIENCE-3 (ANTI-STATIC-ANALYSIS) so detection logic cannot be trivially read out of the binary and disabled. Tier routing handled downstream by Reaper Conclave matrix; the listed Reaper auditors consume this requirement when invoked for the bundle's tier and surface."
+    "claim_boundary_notes": "Standard-level baseline (from manifest.json.standard_claim_policy) already covers OWASP-wide forbidden claims. No requirement-specific additions needed for MASVS-RESILIENCE-1. MASVS-RESILIENCE-1 is mapped to two Constitution v0.5 traces in mapping file v1.2: SEC-PILLAR-5-JAILBREAK-DETECTION (primary, heuristic detection layer) and SEC-PILLAR-5-PLATFORM-ATTESTATION (primary, cryptographic attestation layer). Both are labeled primary because RESILIENCE-1's scope distributes across two separable validation strategies; the partial-mapping label is honest about this. Claims about platform integrity validation depend on the chosen mechanism — heuristic detection claims require multi-check coverage with cryptographic gating; attestation claims require server-side token verification with nonce/replay-window discipline. Defense-in-depth: RESILIENCE-1 protections become more credible when combined with RESILIENCE-3 (ANTI-STATIC-ANALYSIS) so detection logic cannot be trivially read out of the binary and disabled. The listed Reaper auditors consume this requirement in their review of the bundle."
   },
 
   "intrinsic_mapping": {

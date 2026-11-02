@@ -30,11 +30,10 @@
   "source_integrity": {
     "source_artifact_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
     "transcription_input_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
-    "requirement_file_sha256": "1556606a3983e29bf0690a4df28d50ec421e1300900aa2db008618c2cee08ef9"
+    "requirement_file_sha256": "71914b428816c234f1ca8e50d49b6f62638408926ed3c54c21e8230de7500593"
   },
 
   "applicability": {
-    "tier_floor": 1,
     "conditions_logic": "any",
     "conditions": [
       {
@@ -48,7 +47,7 @@
         "value": []
       }
     ],
-    "human_note": "Applies to every app that stores any sensitive data locally. The two conditions are OR'd: applicability is satisfied if either the data retention policies declare any data class for local storage OR if secrets are declared. Mapped Constitution traces have tier_floor 1 (SEC-PILLAR-3-SECURE-STORAGE applies at all tiers; SEC-PILLAR-2-RETENTION-POLICY applies at Tier 2+). Effective tier_floor for this MASVS control is 1, driven by the lower of the two trace floors. In practice every Intrinsic Code app at Tier 1+ stores some sensitive data (at minimum, app preferences containing user identifiers or settings), so this control is effectively universal."
+    "human_note": "Applies to every app that stores any sensitive data locally. The two conditions are OR'd: applicability is satisfied if either the data retention policies declare any data class for local storage OR if secrets are declared. The mapped Constitution traces are SEC-PILLAR-3-SECURE-STORAGE and SEC-PILLAR-2-RETENTION-POLICY."
   },
 
   "intrinsic_interpretation": {
@@ -67,7 +66,7 @@
         "Android: EncryptedSharedPreferences (Jetpack Security) or Android Keystore (KeyStore.getInstance, MasterKey.Builder) for sensitive values; NOT plain SharedPreferences",
         "security_manifest.secrets_inventory[] entries each declare classification (server-only, client-buildtime, client-runtime, public) per Constitution Pillar 3 secrets discipline",
         "security_manifest.data_retention_policies[] entries each declare data class with explicit retention duration; sensitive classes (PII, credentials, payment) routed to secure storage",
-        "Generated code routes sensitive data through SecureStorage abstraction (services/SecureStorage.swift, security/SecureStorage.kt) per Scaffolder Tier 2+ baseline"
+        "Generated code routes sensitive data through SecureStorage abstraction (services/SecureStorage.swift, security/SecureStorage.kt) per the Scaffolder baseline"
       ],
       "failure_indicators": [
         "iOS: Sensitive data written to UserDefaults (NSUserDefaults), plist files, or Documents/ directory without encryption",
@@ -115,7 +114,7 @@
     ],
     "forbidden_claims": [],
     "requires_external_certification": false,
-    "claim_boundary_notes": "Standard-level baseline (from manifest.json.standard_claim_policy) covers OWASP-wide forbidden claims. The corpus does not certify what counts as 'sensitive' for any specific app — sensitivity classification depends on the app's specific data semantics and the founder's threat model. MASVS-STORAGE-1 requires the developer to make this determination; the corpus enforces structural protection mechanisms once classification is declared. Tier routing note: file_standards_auditor and external_standards_mapping_auditor are tier-agnostic. Reaper specialist invocation follows the Reaper Conclave tier matrix; the listed Reaper auditors consume this requirement when invoked for the bundle's tier and surface."
+    "claim_boundary_notes": "Standard-level baseline (from manifest.json.standard_claim_policy) covers OWASP-wide forbidden claims. The corpus does not certify what counts as 'sensitive' for any specific app — sensitivity classification depends on the app's specific data semantics and the founder's threat model. MASVS-STORAGE-1 requires the developer to make this determination; the corpus enforces structural protection mechanisms once classification is declared. The listed Reaper auditors consume this requirement in their review of the bundle."
   },
 
   "intrinsic_mapping": {

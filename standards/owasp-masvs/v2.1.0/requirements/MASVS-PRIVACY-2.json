@@ -32,20 +32,13 @@
   "source_integrity": {
     "source_artifact_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
     "transcription_input_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
-    "requirement_file_sha256": "e7174ae5d2732d5b9ed529ba6194a0dce13b52949a248431da68e3ca1c8bbcef"
+    "requirement_file_sha256": "2492a645fa6f796609072244e3735c6da9afcc77bee4c923da570b72fac3c879"
   },
 
   "applicability": {
-    "tier_floor": 2,
     "conditions_logic": "all",
-    "conditions": [
-      {
-        "field": "security_manifest.app_tier",
-        "operator": ">=",
-        "value": 2
-      }
-    ],
-    "human_note": "Applies at Tier 2+ as a conservative corpus-level gate. Per Constitution Pillar 2 (Data & Identity Discipline), user-identification minimization activates at Tier 2+ where the app handles content distribution and analytics; the dedicated trace SEC-PILLAR-2-USER-IDENTIFICATION-MINIMIZATION is a Tier 2-5 control. The blueprint schema does not yet declare a discrete identifier-strategy declaration field as a top-level applicability filter, so security_manifest.app_tier >= 2 is used as a broad proxy. If a Tier 2+ app explicitly declares no identifier-collection posture (e.g., a fully-anonymous read-only utility with no analytics) and supplies justification, auditors may mark the requirement not-applicable during evidence review with documented justification in security_manifest. In practice every Intrinsic Code app at Tier 2+ requires user-identification minimization because content-distribution and analytics-bearing apps inherently risk identifier accumulation that must be deliberately restricted."
+    "conditions": [],
+    "human_note": "Applies unconditionally (Constitution §9; Part II B6 for the banking lane). Per Constitution Pillar 2 (Data Minimization & Privacy by Design), user-identification minimization applies through SEC-PILLAR-2-USER-IDENTIFICATION-MINIMIZATION, because identifier accumulation must be deliberately restricted."
   },
 
   "intrinsic_interpretation": {
@@ -121,7 +114,7 @@
     ],
     "forbidden_claims": [],
     "requires_external_certification": false,
-    "claim_boundary_notes": "Standard-level baseline (from manifest.json.standard_claim_policy) already covers OWASP-wide forbidden claims. No requirement-specific additions needed for MASVS-PRIVACY-2. MASVS-PRIVACY-2 is mapped to one Constitution v0.5 trace in mapping file v1.2: SEC-PILLAR-2-USER-IDENTIFICATION-MINIMIZATION (primary, direct). The mapping is direct because the trace and the MASVS control state the same requirement at the same level of abstraction. Claims about user-identification prevention depend on the chosen techniques — claims about IDFA/AAID restriction require ATTrackingManager / AdvertisingIdClient opt-out respect; claims about fingerprint isolation require documented purpose-scoped code-path separation; claims about pseudonymization are scoped to linkability reduction (scoped pseudonymous IDs, salt/pepper-managed hashes with secure salt/pepper management) and do NOT extend to full-anonymization assertions — pseudonymization reduces linkability but does not de-identify, and the salt/pepper management approach (secure storage, rotation cadence) determines the strength of the reduction. Out of scope: server-side authenticated-user identity within the app's own backend (PRIVACY-2 targets unauthorized identification and cross-app tracking, not legitimate authenticated-session identity), full-anonymization claims under k-anonymity / differential-privacy frameworks (separate technical and audit requirements), and privacy assessments under GDPR / CCPA (MASVS-PRIVACY disclaims substitution for these per the standard's IMPORTANT DISCLAIMER on page 33). Tier routing handled downstream by Reaper Conclave matrix; the listed Reaper auditors consume this requirement when invoked for the bundle's tier and surface."
+    "claim_boundary_notes": "Standard-level baseline (from manifest.json.standard_claim_policy) already covers OWASP-wide forbidden claims. No requirement-specific additions needed for MASVS-PRIVACY-2. MASVS-PRIVACY-2 is mapped to one Constitution v0.5 trace in mapping file v1.2: SEC-PILLAR-2-USER-IDENTIFICATION-MINIMIZATION (primary, direct). The mapping is direct because the trace and the MASVS control state the same requirement at the same level of abstraction. Claims about user-identification prevention depend on the chosen techniques — claims about IDFA/AAID restriction require ATTrackingManager / AdvertisingIdClient opt-out respect; claims about fingerprint isolation require documented purpose-scoped code-path separation; claims about pseudonymization are scoped to linkability reduction (scoped pseudonymous IDs, salt/pepper-managed hashes with secure salt/pepper management) and do NOT extend to full-anonymization assertions — pseudonymization reduces linkability but does not de-identify, and the salt/pepper management approach (secure storage, rotation cadence) determines the strength of the reduction. Out of scope: server-side authenticated-user identity within the app's own backend (PRIVACY-2 targets unauthorized identification and cross-app tracking, not legitimate authenticated-session identity), full-anonymization claims under k-anonymity / differential-privacy frameworks (separate technical and audit requirements), and privacy assessments under GDPR / CCPA (MASVS-PRIVACY disclaims substitution for these per the standard's IMPORTANT DISCLAIMER on page 33). The listed Reaper auditors consume this requirement in their review of the bundle."
   },
 
   "intrinsic_mapping": {

@@ -31,11 +31,10 @@
   "source_integrity": {
     "source_artifact_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
     "transcription_input_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
-    "requirement_file_sha256": "982f8f9f715873d501fd48f6cb4ae7229eb902edd9c5066833822f087d39c565"
+    "requirement_file_sha256": "4c56f513068048ea9680e438d6226d9fbcb6059d7a61784ede00a1bf7fa28d2a"
   },
 
   "applicability": {
-    "tier_floor": 3,
     "conditions_logic": "all",
     "conditions": [
       {
@@ -44,7 +43,7 @@
         "value": "none"
       }
     ],
-    "human_note": "Applies to every app that declares an authentication flow (technical.auth_flow != \"none\"). Per Constitution Pillar 4 (Authentication & Identity), authentication discipline activates at Tier 3+ where the app handles user authentication and private user-to-user content. Apps with no authentication (technical.auth_flow == \"none\") are formally inapplicable. In practice every Intrinsic Code app at Tier 3+ requires authentication because messaging, sharing, and identity claims are baseline Tier 3 features."
+    "human_note": "Applies to every app that declares an authentication flow (technical.auth_flow != \"none\"), per Constitution Pillar 4 (Authentication & Identity). Apps with no authentication (technical.auth_flow == \"none\") are formally inapplicable."
   },
 
   "intrinsic_interpretation": {
@@ -114,7 +113,7 @@
     ],
     "forbidden_claims": [],
     "requires_external_certification": false,
-    "claim_boundary_notes": "Standard-level baseline (from manifest.json.standard_claim_policy) already covers OWASP-wide forbidden claims. No requirement-specific additions needed for MASVS-AUTH-1. MASVS-AUTH-1 is mapped to two Constitution v0.5 traces in mapping file v1.2: SEC-PILLAR-4-PHISHING-RESISTANT-AUTH (primary, mechanism layer) and SEC-PILLAR-4-AUTH-SESSION-INTEGRITY (primary, session/protocol layer). MASVS-AUTH-1 explicitly scopes its security claims to the client-side discipline (\"the enforcement of these mechanisms must be on the remote endpoint\"); claims about server-side authorization enforcement are out of scope for this control. Tier routing handled downstream by Reaper Conclave matrix; the listed Reaper auditors consume this requirement when invoked for the bundle's tier and surface."
+    "claim_boundary_notes": "Standard-level baseline (from manifest.json.standard_claim_policy) already covers OWASP-wide forbidden claims. No requirement-specific additions needed for MASVS-AUTH-1. MASVS-AUTH-1 is mapped to two Constitution v0.5 traces in mapping file v1.2: SEC-PILLAR-4-PHISHING-RESISTANT-AUTH (primary, mechanism layer) and SEC-PILLAR-4-AUTH-SESSION-INTEGRITY (primary, session/protocol layer). MASVS-AUTH-1 explicitly scopes its security claims to the client-side discipline (\"the enforcement of these mechanisms must be on the remote endpoint\"); claims about server-side authorization enforcement are out of scope for this control. The listed Reaper auditors consume this requirement in their review of the bundle."
   },
 
   "intrinsic_mapping": {

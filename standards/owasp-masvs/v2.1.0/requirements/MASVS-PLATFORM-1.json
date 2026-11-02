@@ -34,11 +34,10 @@
   "source_integrity": {
     "source_artifact_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
     "transcription_input_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
-    "requirement_file_sha256": "1af79dfca54c01aaf329292021f7b7dbcd95a7ae3345e184b89bae2871d88afc"
+    "requirement_file_sha256": "59890f1ccf241ab6aea045bdfee538fdbebaef9dd2582be4f135269a45600ed8"
   },
 
   "applicability": {
-    "tier_floor": 2,
     "conditions_logic": "all",
     "conditions": [
       {
@@ -47,7 +46,7 @@
         "value": []
       }
     ],
-    "human_note": "Applies at Tier 2+ as a conservative corpus-level gate. Per Constitution Pillar 5 (Secure Architecture & Runtime), IPC discipline activates at Tier 2+ where the app handles content distribution and analytics. The blueprint schema does not currently declare a discrete IPC-presence field, so security_manifest.app_tier >= 2 is used as a broad proxy for apps that expose or consume platform IPC surfaces — deep links, custom URL schemes, Android Intents, iOS Universal Links, ContentProviders, and App Extensions. If no IPC exposure exists in a given app, auditors may mark the requirement not-applicable during evidence review. A future schema enhancement (banked: security_manifest.ipc_surfaces[] declaration) will let MASVS-PLATFORM-1 fire only when IPC exposure is declared. In practice most Intrinsic Code apps at Tier 2+ expose at least one IPC surface because deep linking and platform notification handling are common Tier 2+ features.\n\n**Phase 5 migration (2026-05-21):** Applicability condition migrated to a direct-field check on the per-surface evidence array that backs this control. The new condition asks whether the app actually declares the surface this control governs, replacing the prior tier-or-auth-flow proxy. tier_floor stays unchanged as the universal-floor backstop. References Phase 1 schema addition (commit `9ad9b6c`), Phase 4 applicability evaluator (commit `37ce03d`), and Phase 4.5 evaluator `==` operator extension (Phase 5 commit)."
+    "human_note": "Applies to every app that declares an IPC surface in security_manifest.ipc_surfaces (deep links, custom URL schemes, Android Intents, iOS Universal Links, ContentProviders, App Extensions), per Constitution Pillar 5 (Secure Architecture & Runtime). An app that declares none is formally inapplicable.\n\n**Phase 5 migration (2026-05-21):** Applicability condition migrated to a direct-field check on the per-surface evidence array that backs this control. The new condition asks whether the app actually declares the surface this control governs. References Phase 1 schema addition (commit `9ad9b6c`), Phase 4 applicability evaluator (commit `37ce03d`), and Phase 4.5 evaluator `==` operator extension (Phase 5 commit)."
   },
 
   "intrinsic_interpretation": {
@@ -122,7 +121,7 @@
     ],
     "forbidden_claims": [],
     "requires_external_certification": false,
-    "claim_boundary_notes": "Standard-level baseline (from manifest.json.standard_claim_policy) already covers OWASP-wide forbidden claims. No requirement-specific additions needed for MASVS-PLATFORM-1. MASVS-PLATFORM-1 is mapped to four Constitution v0.5 traces in mapping file v1.2: SEC-PILLAR-5-IPC-BOUNDARY (primary, dedicated IPC control) plus three supporting traces covering specific vectors — SCREEN-PROTECTION (screen-capture vector), UI-INTEGRITY (view-isolation vector), and WEBVIEW-DISCIPLINE (JavaScript-bridge vector). Claims about IPC security are valid only when the dedicated primary trace is implemented; supporting-trace evidence alone does not satisfy PLATFORM-1 because the dedicated IPC-BOUNDARY semantics (origin validation, typed payload unmarshalling, permission gating) are mandatory. Out of scope: IPC mechanisms the developer does not control (third-party SDK callbacks that route through their own platform-extension contexts) — those endpoints carry their own MASVS-PLATFORM-1 obligations under the third party's threat model. Tier routing handled downstream by Reaper Conclave matrix; the listed Reaper auditors consume this requirement when invoked for the bundle's tier and surface."
+    "claim_boundary_notes": "Standard-level baseline (from manifest.json.standard_claim_policy) already covers OWASP-wide forbidden claims. No requirement-specific additions needed for MASVS-PLATFORM-1. MASVS-PLATFORM-1 is mapped to four Constitution v0.5 traces in mapping file v1.2: SEC-PILLAR-5-IPC-BOUNDARY (primary, dedicated IPC control) plus three supporting traces covering specific vectors — SCREEN-PROTECTION (screen-capture vector), UI-INTEGRITY (view-isolation vector), and WEBVIEW-DISCIPLINE (JavaScript-bridge vector). Claims about IPC security are valid only when the dedicated primary trace is implemented; supporting-trace evidence alone does not satisfy PLATFORM-1 because the dedicated IPC-BOUNDARY semantics (origin validation, typed payload unmarshalling, permission gating) are mandatory. Out of scope: IPC mechanisms the developer does not control (third-party SDK callbacks that route through their own platform-extension contexts) — those endpoints carry their own MASVS-PLATFORM-1 obligations under the third party's threat model. The listed Reaper auditors consume this requirement in their review of the bundle."
   },
 
   "intrinsic_mapping": {

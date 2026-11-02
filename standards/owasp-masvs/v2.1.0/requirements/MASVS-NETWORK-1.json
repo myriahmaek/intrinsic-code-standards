@@ -32,26 +32,19 @@
   "source_integrity": {
     "source_artifact_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
     "transcription_input_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
-    "requirement_file_sha256": "dd8b22295e365afbf8b3f5196e5abdb5c55482a1d9e80a483cf6e40c3370a28b"
+    "requirement_file_sha256": "f240a05f1072d191c549c4c4795629682a7a354279d9dc87cd4f6c2cce9f808e"
   },
 
   "applicability": {
-    "tier_floor": 1,
     "conditions_logic": "all",
-    "conditions": [
-      {
-        "field": "security_manifest.app_tier",
-        "operator": ">=",
-        "value": 1
-      }
-    ],
-    "human_note": "Applies universally at Tier 1+. Per Constitution Pillar 5 (Secure Architecture & Runtime), secure-transport discipline is universal for every Intrinsic Code app because network communication is assumed baseline (cloud sync, authentication, telemetry, content delivery). The blueprint schema does not declare a discrete network-presence field; the universal applicability is enforced via the app_tier floor instead. In practice every Intrinsic Code app at Tier 1+ performs network communication because cloud sync, authentication, telemetry, or content delivery are baseline."
+    "conditions": [],
+    "human_note": "Applies unconditionally (Constitution §9; Part II B6 for the banking lane). Per Constitution Pillar 5 (Secure Architecture & Runtime), secure-transport discipline is universal because network communication is assumed baseline (cloud sync, authentication, telemetry, content delivery)."
   },
 
   "intrinsic_interpretation": {
     "interpretation_version": "1.0",
     "mapping_strength": "partial",
-    "mapping_rationale": "Constitution Pillar 5 covers MASVS-NETWORK-1 via two layered traces: SEC-PILLAR-5-SECURE-TRANSPORT (primary, Tier 1+ baseline) and SEC-PILLAR-5-CERTIFICATE-PINNING (Tier 4+ supporting). SECURE-TRANSPORT enforces the baseline (TLS defaults, no plaintext HTTP for app-controlled flows, no unsafe validation overrides, modern TLS configuration declared in manifest); CERTIFICATE-PINNING extends to identity pinning at Tier 4+ for high-assurance backend communication. MASVS-NETWORK-1's scope is the universal best-practices baseline; SEC-PILLAR-5-SECURE-TRANSPORT directly implements this at Tier 1+. Implementation correctness for TLS configuration (cipher suite selection, certificate chain validation, server hostname verification) and the absence of accidental overrides (NSAllowsArbitraryLoads, custom TrustManagers) requires auditor judgment beyond manifest declaration. The mapping is partial because no single Constitution control captures the full breadth of MASVS-NETWORK-1 at every tier, but the two-trace coverage substantively addresses the baseline and the Tier 4+ extension.",
+    "mapping_rationale": "Constitution Pillar 5 covers MASVS-NETWORK-1 via two layered traces: SEC-PILLAR-5-SECURE-TRANSPORT (primary, baseline) and SEC-PILLAR-5-CERTIFICATE-PINNING (supporting). SECURE-TRANSPORT enforces the baseline (TLS defaults, no plaintext HTTP for app-controlled flows, no unsafe validation overrides, modern TLS configuration declared in manifest); CERTIFICATE-PINNING extends to identity pinning for backend communication. MASVS-NETWORK-1's scope is the universal best-practices baseline; SEC-PILLAR-5-SECURE-TRANSPORT directly implements this. Implementation correctness for TLS configuration (cipher suite selection, certificate chain validation, server hostname verification) and the absence of accidental overrides (NSAllowsArbitraryLoads, custom TrustManagers) requires auditor judgment beyond manifest declaration. The mapping is partial because no single Constitution control captures the full breadth of MASVS-NETWORK-1, but the two-trace coverage substantively addresses the baseline and the identity-pinning extension.",
     "verification_guidance": {
       "evidence_locator_types": [
         "symbol_pattern",
@@ -64,7 +57,7 @@
         "Android: Network Security Configuration declared in AndroidManifest.xml + res/xml/network_security_config.xml; cleartextTrafficPermitted = false for production builds",
         "Network calls use platform HTTPS clients (URLSession on iOS, OkHttp / HttpsURLConnection on Android) with default TLS configuration — not custom SSLContext or TrustManager bypasses",
         "Modern TLS configuration: minimum TLS 1.2, TLS 1.3 preferred where supported; cipher suites restricted to FORWARD-SECRECY-capable suites",
-        "Tier 4+: certificate pinning declared in manifest with pin set, pin rotation policy, and backup pin discipline (per SEC-PILLAR-5-CERTIFICATE-PINNING)",
+        "Certificate pinning declared in manifest with pin set, pin rotation policy, and backup pin discipline (per SEC-PILLAR-5-CERTIFICATE-PINNING)",
         "Third-party SDKs verified to use platform secure transport — no SDK that imports its own TLS stack or accepts cleartext"
       ],
       "failure_indicators": [
@@ -105,8 +98,8 @@
 
   "claim_boundaries": {
     "allowed_claims": [
-      "uses Constitution Pillar 5 secure-transport discipline (SEC-PILLAR-5-SECURE-TRANSPORT) as primary evidence toward MASVS-NETWORK-1 baseline coverage at Tier 1+",
-      "uses Constitution Pillar 5 certificate-pinning discipline (SEC-PILLAR-5-CERTIFICATE-PINNING) as supporting evidence toward MASVS-NETWORK-1 high-assurance coverage at Tier 4+",
+      "uses Constitution Pillar 5 secure-transport discipline (SEC-PILLAR-5-SECURE-TRANSPORT) as primary evidence toward MASVS-NETWORK-1 baseline coverage",
+      "uses Constitution Pillar 5 certificate-pinning discipline (SEC-PILLAR-5-CERTIFICATE-PINNING) as supporting evidence toward MASVS-NETWORK-1 identity-pinning coverage",
       "enforces platform-secure TLS defaults (App Transport Security on iOS, Network Security Configuration on Android) per MASVS-NETWORK-1 baseline requirement"
     ],
     "softened_claims": [
@@ -115,7 +108,7 @@
     ],
     "forbidden_claims": [],
     "requires_external_certification": false,
-    "claim_boundary_notes": "Standard-level baseline (from manifest.json.standard_claim_policy) already covers OWASP-wide forbidden claims. No requirement-specific additions needed for MASVS-NETWORK-1. MASVS-NETWORK-1 is mapped to two Constitution v0.5 traces in mapping file v1.2: SEC-PILLAR-5-SECURE-TRANSPORT (primary, Tier 1+ baseline) and SEC-PILLAR-5-CERTIFICATE-PINNING (supporting, Tier 4+ identity-pinning addition). OS-level platform-owned flows (captive portal, system updates, TLS stack's own OCSP/CRL fetches) are out of scope for this control. Claims about resistance to nation-state-level TLS attacks (CA compromise, BGP-level traffic hijacking) are out of scope unless certificate pinning is in effect at Tier 4+. Tier routing handled downstream by Reaper Conclave matrix; the listed Reaper auditors consume this requirement when invoked for the bundle's tier and surface."
+    "claim_boundary_notes": "Standard-level baseline (from manifest.json.standard_claim_policy) already covers OWASP-wide forbidden claims. No requirement-specific additions needed for MASVS-NETWORK-1. MASVS-NETWORK-1 is mapped to two Constitution v0.5 traces in mapping file v1.2: SEC-PILLAR-5-SECURE-TRANSPORT (primary, baseline) and SEC-PILLAR-5-CERTIFICATE-PINNING (supporting, identity-pinning addition). OS-level platform-owned flows (captive portal, system updates, TLS stack's own OCSP/CRL fetches) are out of scope for this control. Claims about resistance to nation-state-level TLS attacks (CA compromise, BGP-level traffic hijacking) are out of scope unless certificate pinning is in effect. The listed Reaper auditors consume this requirement in their review of the bundle."
   },
 
   "intrinsic_mapping": {

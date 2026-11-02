@@ -32,20 +32,13 @@
   "source_integrity": {
     "source_artifact_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
     "transcription_input_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
-    "requirement_file_sha256": "20a6aaee145e2806157200e9331139601b6e99c611220d72961e7f19295db8df"
+    "requirement_file_sha256": "92b48593e5ab4102f04917d6097171883fdfead73c238d0368e0baed1370a554"
   },
 
   "applicability": {
-    "tier_floor": 1,
     "conditions_logic": "all",
-    "conditions": [
-      {
-        "field": "security_manifest.app_tier",
-        "operator": ">=",
-        "value": 1
-      }
-    ],
-    "human_note": "Applies at Tier 1+ as a conservative corpus-level gate. Per Constitution Pillar 3 (Cryptography & Key Material), dependency hygiene activates at Tier 1+; SEC-PILLAR-3-DEPENDENCY-PINNING is a Tier 1-5 control while SEC-PILLAR-3-SDK-PROVENANCE is Tier 3-5 (vendor security history review). The blueprint schema declares sdk_provenance (per Constitution v0.5); the broader dependency_pinning field referenced in the Constitution definition is not yet a dedicated schema field, so current evidence flows through package manifests (Podfile, Package.swift, build.gradle), committed lockfiles (Package.resolved, Podfile.lock, gradle.lockfile), reachability_notes, and dependency-scan tool outputs. A future schema enhancement (banked) will add dedicated dependency_pinning and dependency_vulnerability_scan_policy fields. The tier-1 applicability floor is honest because every modern mobile app ships third-party dependencies that may carry disclosed vulnerabilities; provenance review at Tier 3+ adds the vendor-history dimension. In practice every Intrinsic Code app at Tier 1+ requires dependency vulnerability scanning because Node modules, Pods, Gradle dependencies, and SwiftPM packages all carry potential CVE exposure."
+    "conditions": [],
+    "human_note": "Applies unconditionally (Constitution §9; Part II B6 for the banking lane). Per Constitution Pillar 3 (Cryptography & Dependencies), dependency hygiene applies in every run through SEC-PILLAR-3-DEPENDENCY-PINNING, with vendor-history review through SEC-PILLAR-3-SDK-PROVENANCE. Evidence flows through package manifests (Podfile, Package.swift, build.gradle), committed lockfiles (Package.resolved, Podfile.lock, gradle.lockfile), reachability_notes, and dependency-scan tool outputs. Dependency vulnerability scanning is required because every modern mobile app ships third-party dependencies that may carry disclosed vulnerabilities."
   },
 
   "intrinsic_interpretation": {
@@ -118,7 +111,7 @@
     ],
     "forbidden_claims": [],
     "requires_external_certification": false,
-    "claim_boundary_notes": "Standard-level baseline (from manifest.json.standard_claim_policy) already covers OWASP-wide forbidden claims. No requirement-specific additions needed for MASVS-CODE-3. MASVS-CODE-3 is mapped to two Constitution v0.5 traces in mapping file v1.2: SEC-PILLAR-3-DEPENDENCY-PINNING (supporting, version-tracking-and-reachability layer) and SEC-PILLAR-3-SDK-PROVENANCE (supporting, vendor-history layer). Both are labeled supporting because no single Constitution trace is dedicated 1:1 to MASVS-CODE-3 — Pillar 3 distributes the coverage across two Pillar 3 controls. The partial-mapping label is honest about this. Claims about known-vulnerability coverage are scoped — they apply only to the scanner databases consulted (NVD / OSV / GitHub Advisory or others as declared), the severity thresholds enforced, the resolved dependency graph at scan time, the reachability rules applied, and the scan-time snapshot; claims do NOT extend to undisclosed-zero-day vulnerabilities, post-scan-window disclosures, undeclared scanner-database gaps, or full-whitebox-audit completeness. MASVS-CODE-3 explicitly scopes to \"low-hanging fruit\" scanner-detectable vulnerabilities. Out of scope: OS-bundled library CVEs (covered by MASVS-CODE-1 platform-version-floor), build-time-only tooling CVEs (not shipped), and reachability-analysis-suppressed unreachable findings (require documented analysis re-runs on code changes). Tier routing handled downstream by Reaper Conclave matrix; the listed Reaper auditors consume this requirement when invoked for the bundle's tier and surface."
+    "claim_boundary_notes": "Standard-level baseline (from manifest.json.standard_claim_policy) already covers OWASP-wide forbidden claims. No requirement-specific additions needed for MASVS-CODE-3. MASVS-CODE-3 is mapped to two Constitution v0.5 traces in mapping file v1.2: SEC-PILLAR-3-DEPENDENCY-PINNING (supporting, version-tracking-and-reachability layer) and SEC-PILLAR-3-SDK-PROVENANCE (supporting, vendor-history layer). Both are labeled supporting because no single Constitution trace is dedicated 1:1 to MASVS-CODE-3 — Pillar 3 distributes the coverage across two Pillar 3 controls. The partial-mapping label is honest about this. Claims about known-vulnerability coverage are scoped — they apply only to the scanner databases consulted (NVD / OSV / GitHub Advisory or others as declared), the severity thresholds enforced, the resolved dependency graph at scan time, the reachability rules applied, and the scan-time snapshot; claims do NOT extend to undisclosed-zero-day vulnerabilities, post-scan-window disclosures, undeclared scanner-database gaps, or full-whitebox-audit completeness. MASVS-CODE-3 explicitly scopes to \"low-hanging fruit\" scanner-detectable vulnerabilities. Out of scope: OS-bundled library CVEs (covered by MASVS-CODE-1 platform-version-floor), build-time-only tooling CVEs (not shipped), and reachability-analysis-suppressed unreachable findings (require documented analysis re-runs on code changes). The listed Reaper auditors consume this requirement in their review of the bundle."
   },
 
   "intrinsic_mapping": {

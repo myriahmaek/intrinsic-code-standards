@@ -32,20 +32,13 @@
   "source_integrity": {
     "source_artifact_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
     "transcription_input_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
-    "requirement_file_sha256": "ac3cb619af90896b0d9da2d470b13a7b6c9461f15b0f3d2d6fd152f03b5da4ce"
+    "requirement_file_sha256": "fb01bfc8a9f095bc530845324029e62401d2b4159fb3c7dee5a4f1fcb52ab229"
   },
 
   "applicability": {
-    "tier_floor": 1,
     "conditions_logic": "all",
-    "conditions": [
-      {
-        "field": "security_manifest.app_tier",
-        "operator": ">=",
-        "value": 1
-      }
-    ],
-    "human_note": "Applies at Tier 1+ as a conservative corpus-level gate. Per Constitution Pillar 7 (Compliance & Last-Mile), app-update enforcement discipline activates at Tier 1+ as part of platform-store compliance baseline; the dedicated trace SEC-PILLAR-7-LAST-MILE-COMPLIANCE is a Tier 1-5 control. The blueprint schema does not currently declare a discrete update-enforcement-mechanism field as a top-level applicability filter, so security_manifest.app_tier >= 1 is used as a broad proxy. If a Tier 1+ app explicitly accepts the threat-model risk of running stale versions (e.g., a static-content reference app where no critical-update mechanism is required, an open-source app with documented exception), auditors may mark the requirement not-applicable during evidence review with documented justification in security_manifest. In practice every Intrinsic Code app at Tier 1+ requires update-enforcement because post-release critical vulnerabilities require a forcing function to update the installed base."
+    "conditions": [],
+    "human_note": "Applies unconditionally (Constitution §9; Part II B6 for the banking lane). Per Constitution Pillar 7 (Last-Mile Compliance), app-update enforcement discipline is part of the platform-store compliance baseline under SEC-PILLAR-7-LAST-MILE-COMPLIANCE. Update enforcement is required because post-release critical vulnerabilities require a forcing function to update the installed base."
   },
 
   "intrinsic_interpretation": {
@@ -118,7 +111,7 @@
     ],
     "forbidden_claims": [],
     "requires_external_certification": false,
-    "claim_boundary_notes": "Standard-level baseline (from manifest.json.standard_claim_policy) already covers OWASP-wide forbidden claims. No requirement-specific additions needed for MASVS-CODE-2. MASVS-CODE-2 is mapped to one Constitution v0.5 trace in mapping file v1.2: SEC-PILLAR-7-LAST-MILE-COMPLIANCE (primary, direct). The mapping is direct because the trace explicitly includes app-update enforcement among its platform-store compliance scope items. Claims about update-enforcement effectiveness depend on the chosen mechanism — backend-authoritative-minimum-version claims require signed-response or HTTPS-only verification; account-level-enforcement claims require server-side version rejection on authenticated calls; coordination claims require declared operational handoff between store-publish and backend-version-bump. Out of scope: end-user devices that don't update due to platform-level constraints (low storage, unmetered-network unavailability, parental restrictions) — the app cannot control these conditions, only the enforcement gate on continued usage. Tier routing handled downstream by Reaper Conclave matrix; the listed Reaper auditors consume this requirement when invoked for the bundle's tier and surface."
+    "claim_boundary_notes": "Standard-level baseline (from manifest.json.standard_claim_policy) already covers OWASP-wide forbidden claims. No requirement-specific additions needed for MASVS-CODE-2. MASVS-CODE-2 is mapped to one Constitution v0.5 trace in mapping file v1.2: SEC-PILLAR-7-LAST-MILE-COMPLIANCE (primary, direct). The mapping is direct because the trace explicitly includes app-update enforcement among its platform-store compliance scope items. Claims about update-enforcement effectiveness depend on the chosen mechanism — backend-authoritative-minimum-version claims require signed-response or HTTPS-only verification; account-level-enforcement claims require server-side version rejection on authenticated calls; coordination claims require declared operational handoff between store-publish and backend-version-bump. Out of scope: end-user devices that don't update due to platform-level constraints (low storage, unmetered-network unavailability, parental restrictions) — the app cannot control these conditions, only the enforcement gate on continued usage. The listed Reaper auditors consume this requirement in their review of the bundle."
   },
 
   "intrinsic_mapping": {

@@ -32,20 +32,13 @@
   "source_integrity": {
     "source_artifact_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
     "transcription_input_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
-    "requirement_file_sha256": "450ec2c713a122291756c45dc8f5ec3d539531ec0f953bd8eebf12ae107d1270"
+    "requirement_file_sha256": "cc057ef7579393f09242bde648ae4cd4710783c10ae15ab6939e5eb24b96a71e"
   },
 
   "applicability": {
-    "tier_floor": 2,
     "conditions_logic": "all",
-    "conditions": [
-      {
-        "field": "security_manifest.app_tier",
-        "operator": ">=",
-        "value": 2
-      }
-    ],
-    "human_note": "Applies at Tier 2+ as a conservative corpus-level gate. Per Constitution Pillar 5 (Secure Architecture & Runtime), anti-tampering discipline activates at Tier 2+ where the app handles content distribution and analytics; the primary trace SEC-PILLAR-5-ANTI-TAMPER is a Tier 2-5 control (new in Constitution v0.5). The blueprint schema does not currently declare a discrete tamper-response-policy field as a top-level applicability filter, so security_manifest.app_tier >= 2 is used as a broad proxy. If a Tier 2+ app explicitly accepts the threat-model risk of running a modified binary (e.g., an internal-only build, an open-source app with documented exception), auditors may mark the requirement not-applicable during evidence review with documented justification in security_manifest. In practice every Intrinsic Code app at Tier 2+ requires anti-tampering protections because content-distribution apps face the back-doored-redistribution threat at app stores and from sideload sources."
+    "conditions": [],
+    "human_note": "Applies unconditionally (Constitution §9; Part II B6 for the banking lane). Per Constitution Pillar 5 (Secure Architecture & Runtime), anti-tampering discipline is realized through SEC-PILLAR-5-ANTI-TAMPER, because apps face the back-doored-redistribution threat at app stores and from sideload sources."
   },
 
   "intrinsic_interpretation": {
@@ -120,7 +113,7 @@
     ],
     "forbidden_claims": [],
     "requires_external_certification": false,
-    "claim_boundary_notes": "Standard-level baseline (from manifest.json.standard_claim_policy) already covers OWASP-wide forbidden claims. No requirement-specific additions needed for MASVS-RESILIENCE-2. MASVS-RESILIENCE-2 is mapped to four Constitution v0.5 traces in mapping file v1.2: SEC-PILLAR-5-ANTI-TAMPER (primary, dedicated code/resource integrity control) plus three supporting traces covering specific tampering vectors — ANTI-DEBUG (runtime debugger interference), JAILBREAK-DETECTION (tampered execution environment), and PLATFORM-ATTESTATION (cryptographic integrity evidence). Claims about anti-tampering security are valid only when the dedicated primary trace is implemented; supporting-trace evidence alone does not satisfy RESILIENCE-2 because the dedicated ANTI-TAMPER semantics (code/resource integrity checks, signed-build verification, modified-package detection, declared response policy) are mandatory. Defense-in-depth: RESILIENCE-2 protections become substantially more credible when combined with RESILIENCE-1 (platform integrity validation) and RESILIENCE-3 (anti-static-analysis to prevent trivial disablement of detection logic). Tier routing handled downstream by Reaper Conclave matrix; the listed Reaper auditors consume this requirement when invoked for the bundle's tier and surface."
+    "claim_boundary_notes": "Standard-level baseline (from manifest.json.standard_claim_policy) already covers OWASP-wide forbidden claims. No requirement-specific additions needed for MASVS-RESILIENCE-2. MASVS-RESILIENCE-2 is mapped to four Constitution v0.5 traces in mapping file v1.2: SEC-PILLAR-5-ANTI-TAMPER (primary, dedicated code/resource integrity control) plus three supporting traces covering specific tampering vectors — ANTI-DEBUG (runtime debugger interference), JAILBREAK-DETECTION (tampered execution environment), and PLATFORM-ATTESTATION (cryptographic integrity evidence). Claims about anti-tampering security are valid only when the dedicated primary trace is implemented; supporting-trace evidence alone does not satisfy RESILIENCE-2 because the dedicated ANTI-TAMPER semantics (code/resource integrity checks, signed-build verification, modified-package detection, declared response policy) are mandatory. Defense-in-depth: RESILIENCE-2 protections become substantially more credible when combined with RESILIENCE-1 (platform integrity validation) and RESILIENCE-3 (anti-static-analysis to prevent trivial disablement of detection logic). The listed Reaper auditors consume this requirement in their review of the bundle."
   },
 
   "intrinsic_mapping": {

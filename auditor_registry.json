@@ -12,7 +12,7 @@
     {
       "auditor_id": "file_implementation_auditor",
       "prompt_file": "prompts/file-implementation-auditor-prompt.md",
-      "domain": "per-file TODO completeness + NIAP attestation structure (Tier 5)",
+      "domain": "per-file TODO completeness + NIAP attestation structure",
       "status": "active",
       "promoted_to_active_date": "2026-05-09"
     },
@@ -68,7 +68,7 @@
     {
       "auditor_id": "reaper-compliance",
       "prompt_file": "prompts/reaper-compliance-prompt.md",
-      "domain": "adversarial audit of regulatory compliance posture (Tier 4-5)",
+      "domain": "adversarial audit of regulatory compliance posture",
       "status": "active",
       "promoted_to_active_date": "2026-05-10"
     },

@@ -1,12 +1,12 @@
 {
-  "corpus_version": "v0.1.0",
-  "corpus_version_date": "2026-05-19",
+  "corpus_version": "v0.2.0",
+  "corpus_version_date": "2026-11-01",
   "blueprint_schema_version": "1.0",
   "blueprint_schema_path": "orchestrator/schemas/blueprint.schema.json",
   "constitution_mapping_file_locator": {
     "path_in_main_repo": "mappings/constitution_to_external_standards.json",
-    "expected_mapping_file_version": "1.1",
-    "expected_constitution_version": "0.4",
+    "expected_mapping_file_version": "2.0",
+    "expected_constitution_version": "2.0",
     "main_repo_visibility": "private",
     "external_auditor_access_note": "Mapping file lives in the private factory repo. External auditors verifying a Receipt may request the mapping file at the corpus commit hash from the founder via support@beforrealmedia.com; verify against the corpus version's expected_mapping_file_version field."
   },
@@ -27,13 +27,13 @@
       "status": "not_transcribed",
       "current_version": null,
       "verified_at": null,
-      "reason": "Tier 4 dependency"
+      "reason": "Planned standard; not in the corpus yet"
     },
     "HIPAA": {
       "status": "not_transcribed",
       "current_version": null,
       "verified_at": null,
-      "reason": "Tier 4 dependency"
+      "reason": "Planned standard; not in the corpus yet"
     }
   },
   "review_cadence_days": 90,

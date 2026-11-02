@@ -32,11 +32,10 @@
   "source_integrity": {
     "source_artifact_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
     "transcription_input_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
-    "requirement_file_sha256": "74e311cd73b179cd7fe3a9ea9bae283fdc73f26a4a7af34a184dee21f3070141"
+    "requirement_file_sha256": "35b6cd5bbe5634070ea9d7d4263ff316d475c766528e8a80ef30ae6e8fd880ba"
   },
 
   "applicability": {
-    "tier_floor": 1,
     "conditions_logic": "all",
     "conditions": [
       {
@@ -45,7 +44,7 @@
         "value": []
       }
     ],
-    "human_note": "Applies to every app that declares any cryptographic primitive in its security_manifest.crypto_inventory[]. Per Constitution Pillar 3 (Cryptography & Dependencies), this is universal at Tier 1+. Apps with no cryptography (empty crypto_inventory[]) are formally inapplicable. In practice every Intrinsic Code app at Tier 1+ has at least one entry in crypto_inventory[] because storage, transport, and integrity primitives are baseline."
+    "human_note": "Applies to every app that declares any cryptographic primitive in its security_manifest.crypto_inventory[], per Constitution Pillar 3 (Cryptography & Dependencies). Apps with no cryptography (empty crypto_inventory[]) are formally inapplicable."
   },
 
   "intrinsic_interpretation": {
@@ -110,7 +109,7 @@
     ],
     "forbidden_claims": [],
     "requires_external_certification": false,
-    "claim_boundary_notes": "Standard-level baseline (from manifest.json.standard_claim_policy) already covers OWASP-wide forbidden claims. No requirement-specific additions needed for MASVS-CRYPTO-1. Note that MASVS-CRYPTO-1 does NOT publish a specific approved-primitive list in its control text — it requires 'current strong cryptography' per industry best practices. Constitutional primitives serve as evidence toward MASVS-CRYPTO-1 coverage, not as a strict-subset claim. Claims about cryptographic strength against future cryptanalytic advances (quantum, etc.) are out of scope for this control. Tier routing note: file_standards_auditor and external_standards_mapping_auditor are tier-agnostic. Reaper specialist invocation follows the Reaper Conclave tier matrix; the listed Reaper auditors consume this requirement when invoked for the bundle's tier and surface."
+    "claim_boundary_notes": "Standard-level baseline (from manifest.json.standard_claim_policy) already covers OWASP-wide forbidden claims. No requirement-specific additions needed for MASVS-CRYPTO-1. Note that MASVS-CRYPTO-1 does NOT publish a specific approved-primitive list in its control text — it requires 'current strong cryptography' per industry best practices. Constitutional primitives serve as evidence toward MASVS-CRYPTO-1 coverage, not as a strict-subset claim. Claims about cryptographic strength against future cryptanalytic advances (quantum, etc.) are out of scope for this control. The listed Reaper auditors consume this requirement in their review of the bundle."
   },
 
   "intrinsic_mapping": {

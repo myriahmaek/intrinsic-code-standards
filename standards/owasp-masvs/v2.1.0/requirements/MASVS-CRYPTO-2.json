@@ -32,11 +32,10 @@
   "source_integrity": {
     "source_artifact_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
     "transcription_input_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
-    "requirement_file_sha256": "88a001a79548b72db09bf0caed715fd2051ffdfe5f94410caca9aae3f55e8c88"
+    "requirement_file_sha256": "93b916b299f1ca9a85204694537e0f88d7e215f4bd11ef44ca766de8e2b208ca"
   },
 
   "applicability": {
-    "tier_floor": 1,
     "conditions_logic": "all",
     "conditions": [
       {
@@ -45,7 +44,7 @@
         "value": []
       }
     ],
-    "human_note": "Applies to every app that declares any cryptographic primitive in its security_manifest.crypto_inventory[]. Per Constitution Pillar 3 (Cryptography & Dependencies), key management discipline is universal at Tier 1+. Apps with no cryptography (empty crypto_inventory[]) are formally inapplicable. In practice every Intrinsic Code app at Tier 1+ has at least one cryptographic key in scope because storage, transport, and integrity primitives require keys."
+    "human_note": "Applies to every app that declares any cryptographic primitive in its security_manifest.crypto_inventory[], per Constitution Pillar 3 (Cryptography & Dependencies) key management discipline. Apps with no cryptography (empty crypto_inventory[]) are formally inapplicable."
   },
 
   "intrinsic_interpretation": {
@@ -65,7 +64,7 @@
         "Long-lived keys declare a rotation_period field in secrets_inventory[]; short-lived session keys declare scope and lifetime",
         "Key storage routes through platform secure storage APIs (Keychain Services / SecKeyCreateRandomKey on iOS; Android Keystore / KeyGenParameterSpec on Android)",
         "Key destruction in generated code uses platform-supported mechanisms (CryptoKit handles automatic zeroing for SymmetricKey; Android keystore-managed keys destroyed via KeyStore.deleteEntry)",
-        "Tier 4+: keys held in non-swappable memory pages where W^X policy declared in manifest (SEC-PILLAR-5-WX-MEMORY supporting evidence)"
+        "Keys held in non-swappable memory pages where W^X policy declared in manifest (SEC-PILLAR-5-WX-MEMORY supporting evidence)"
       ],
       "failure_indicators": [
         "Hardcoded cryptographic keys in source code, asset bundles, configuration files, or environment variables baked into release binaries",
@@ -115,7 +114,7 @@
     ],
     "forbidden_claims": [],
     "requires_external_certification": false,
-    "claim_boundary_notes": "Standard-level baseline (from manifest.json.standard_claim_policy) already covers OWASP-wide forbidden claims. No requirement-specific additions needed for MASVS-CRYPTO-2. MASVS-CRYPTO-2 is mapped to four Constitution v0.5 traces in mapping file v1.2: SEC-PILLAR-3-KEY-MANAGEMENT (primary), SEC-PILLAR-3-SECURE-STORAGE (supporting), SEC-PILLAR-3-CRYPTO-PRIMITIVES (supporting, key-generation primitives), and SEC-PILLAR-3-DEPENDENCY-PINNING (supporting, supply chain). The lifecycle scope is broad and implementation-correctness verification (RNG usage, IV uniqueness, rotation triggers, destruction discipline) requires auditor judgment beyond manifest declaration. Claims about resistance to side-channel attacks against key material (timing, power, cache attacks) are out of scope for this control unless explicitly declared at Tier 4+. Tier routing handled downstream by Reaper Conclave matrix; the listed Reaper auditors consume this requirement when invoked for the bundle's tier and surface."
+    "claim_boundary_notes": "Standard-level baseline (from manifest.json.standard_claim_policy) already covers OWASP-wide forbidden claims. No requirement-specific additions needed for MASVS-CRYPTO-2. MASVS-CRYPTO-2 is mapped to four Constitution v0.5 traces in mapping file v1.2: SEC-PILLAR-3-KEY-MANAGEMENT (primary), SEC-PILLAR-3-SECURE-STORAGE (supporting), SEC-PILLAR-3-CRYPTO-PRIMITIVES (supporting, key-generation primitives), and SEC-PILLAR-3-DEPENDENCY-PINNING (supporting, supply chain). The lifecycle scope is broad and implementation-correctness verification (RNG usage, IV uniqueness, rotation triggers, destruction discipline) requires auditor judgment beyond manifest declaration. Claims about resistance to side-channel attacks against key material (timing, power, cache attacks) are out of scope for this control unless explicitly declared. The listed Reaper auditors consume this requirement in their review of the bundle."
   },
 
   "intrinsic_mapping": {

@@ -65,6 +65,6 @@
       "aligned with OWASP MASVS guidance",
       "follows OWASP MASVS verification recommendations"
     ],
-    "standard_policy_notes": "OWASP MASVS is a verification standard, not a certification program. The OWASP Foundation explicitly does not certify applications against MASVS. Per LOAD-14: any requirement under this standard with standards_body_endorsement.endorsed: true is a corpus load failure. Per three-tier inheritance: every MASVS requirement file inherits these forbidden_claims; per-requirement claim_boundaries.forbidden_claims may add to but never un-forbid these. The phrase 'MASVS-compliant' is forbidden because OWASP itself uses 'evaluated against' / 'verifies' language rather than 'compliant'; using 'compliant' implies an authority OWASP does not assert."
+    "standard_policy_notes": "OWASP MASVS is a verification standard, not a certification program. The OWASP Foundation explicitly does not certify applications against MASVS. Per LOAD-14: any requirement under this standard with standards_body_endorsement.endorsed: true is a corpus load failure. Per three-level inheritance: every MASVS requirement file inherits these forbidden_claims; per-requirement claim_boundaries.forbidden_claims may add to but never un-forbid these. The phrase 'MASVS-compliant' is forbidden because OWASP itself uses 'evaluated against' / 'verifies' language rather than 'compliant'; using 'compliant' implies an authority OWASP does not assert."
   }
 }

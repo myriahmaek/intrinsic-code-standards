@@ -32,20 +32,13 @@
   "source_integrity": {
     "source_artifact_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
     "transcription_input_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
-    "requirement_file_sha256": "6c19977b7445191bfdb2b955e8b3412b4785a56b2a1edb5cc3058c003107d280"
+    "requirement_file_sha256": "38c52345f89ee04411d607e30e6652fae9d78a80ce361cf292b50d6a7edfa9b5"
   },
 
   "applicability": {
-    "tier_floor": 1,
     "conditions_logic": "all",
-    "conditions": [
-      {
-        "field": "security_manifest.app_tier",
-        "operator": ">=",
-        "value": 1
-      }
-    ],
-    "human_note": "Applies at Tier 1+ as a conservative corpus-level gate. Per Constitution Pillar 3 (Cryptography & Key Material), platform version floor discipline is universal — the dedicated trace SEC-PILLAR-3-PLATFORM-VERSION-FLOOR (new in Constitution v0.5) is a Tier 1-5 control because every app declares a minimum OS version regardless of tier. The Constitution v0.5 trace definition references a `security_manifest.minimum_platform_version` declaration that is not yet a dedicated field in the blueprint schema; current applicability uses `security_manifest.app_tier >= 1` as proxy, and evidence flows through build-setting surfaces (iOS IPHONEOS_DEPLOYMENT_TARGET, Android minSdkVersion). A future schema enhancement (banked) will add the dedicated minimum_platform_version field. In practice every Intrinsic Code app at Tier 1+ requires a declared minimum-version floor because secure storage APIs, biometric frameworks, and network defaults all carry per-OS-version availability matrices that the floor enforces against."
+    "conditions": [],
+    "human_note": "Applies unconditionally (Constitution §9; Part II B6 for the banking lane). Per Constitution Pillar 3 (Cryptography & Dependencies), platform version floor discipline is universal: SEC-PILLAR-3-PLATFORM-VERSION-FLOOR applies in every run because every app declares a minimum OS version. Evidence flows through build-setting surfaces (iOS IPHONEOS_DEPLOYMENT_TARGET, Android minSdkVersion). A declared floor is required because secure storage APIs, biometric frameworks, and network defaults all carry per-OS-version availability matrices that the floor enforces against."
   },
 
   "intrinsic_interpretation": {
@@ -64,7 +57,7 @@
         "iOS: Info.plist's MinimumOSVersion (set by Xcode from deployment target) matches the declared floor; build fails if mismatched",
         "Android: app's build.gradle declares minSdkVersion (or minSdk) at a value matching or exceeding the declared minimum platform version in the blueprint",
         "Android: AndroidManifest.xml's <uses-sdk android:minSdkVersion=\"N\"> matches the declared floor; build fails if mismatched",
-        "Build configurations on both platforms align with the blueprint's declared minimum (currently captured via PIPELINE_LANGUAGE tier-floor conventions and blueprint-validation; future schema field security_manifest.minimum_platform_version will formalize the per-platform declaration)",
+        "Build configurations on both platforms align with the blueprint's declared minimum (captured through the lane's platform floor and blueprint validation; future schema field security_manifest.minimum_platform_version will formalize the per-platform declaration)",
         "Floor declared at or above the version required for the most-restrictive platform-secure mechanism the app uses (e.g., if app uses CryptoKit which requires iOS 13+, floor must be >= 13; if app uses BiometricPrompt strong-class which requires API 28+, floor must be >= 28); auditor cross-references the blueprint's declared minimum against the security_manifest's declared primitives, not against a non-existent minimum_platform_version field",
         "Floor re-evaluation logged on platform vendor end-of-life announcements (Apple security update support windows, Google Android version support cycles)"
       ],
@@ -116,7 +109,7 @@
     ],
     "forbidden_claims": [],
     "requires_external_certification": false,
-    "claim_boundary_notes": "Standard-level baseline (from manifest.json.standard_claim_policy) already covers OWASP-wide forbidden claims. No requirement-specific additions needed for MASVS-CODE-1. MASVS-CODE-1 is mapped to one Constitution v0.5 trace in mapping file v1.2: SEC-PILLAR-3-PLATFORM-VERSION-FLOOR (primary, direct). The trace was added in v0.5 specifically to provide a 1:1 mapping to CODE-1, so the mapping is direct rather than partial. Claims about platform-version security depend on the floor being aligned with currently-supported OS levels — declaring a floor below the OS vendor's security-update support window does not satisfy CODE-1 even though a floor is technically declared. Out of scope: OS-vendor patch deployment to end-user devices (Apple/Google control this, not the app); apps cannot force end-users onto patched OS versions, only enforce a minimum-version-floor at install/launch via platform store mechanisms. Tier routing handled downstream by Reaper Conclave matrix; the listed Reaper auditors consume this requirement when invoked for the bundle's tier and surface."
+    "claim_boundary_notes": "Standard-level baseline (from manifest.json.standard_claim_policy) already covers OWASP-wide forbidden claims. No requirement-specific additions needed for MASVS-CODE-1. MASVS-CODE-1 is mapped to one Constitution v0.5 trace in mapping file v1.2: SEC-PILLAR-3-PLATFORM-VERSION-FLOOR (primary, direct). The trace was added in v0.5 specifically to provide a 1:1 mapping to CODE-1, so the mapping is direct rather than partial. Claims about platform-version security depend on the floor being aligned with currently-supported OS levels — declaring a floor below the OS vendor's security-update support window does not satisfy CODE-1 even though a floor is technically declared. Out of scope: OS-vendor patch deployment to end-user devices (Apple/Google control this, not the app); apps cannot force end-users onto patched OS versions, only enforce a minimum-version-floor at install/launch via platform store mechanisms. The listed Reaper auditors consume this requirement in their review of the bundle."
   },
 
   "intrinsic_mapping": {

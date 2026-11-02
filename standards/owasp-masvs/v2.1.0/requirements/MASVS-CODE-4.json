@@ -32,20 +32,13 @@
   "source_integrity": {
     "source_artifact_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
     "transcription_input_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
-    "requirement_file_sha256": "c4d01e48cbf58559e584a5ee2f543fa68a52d19089b6f88b4141e24019885af9"
+    "requirement_file_sha256": "12c8b1f3641faccf1704083c3b155f1458b657bc7242c93000cb0ee9953e5e97"
   },
 
   "applicability": {
-    "tier_floor": 1,
     "conditions_logic": "all",
-    "conditions": [
-      {
-        "field": "security_manifest.app_tier",
-        "operator": ">=",
-        "value": 1
-      }
-    ],
-    "human_note": "Applies universally at Tier 1+. Per Constitution Pillar 5 (Secure Architecture & Runtime), input validation discipline is universal for every Intrinsic Code app because input boundaries (UI input, IPC, network responses, file system reads, deserialization) are assumed baseline. The blueprint schema does not declare a discrete input-boundaries field; the universal applicability is enforced via the app_tier floor instead. In practice every Intrinsic Code app at Tier 1+ has at least one input boundary because UI input, network responses, or IPC payloads are baseline."
+    "conditions": [],
+    "human_note": "Applies unconditionally (Constitution §9; Part II B6 for the banking lane). Per Constitution Pillar 5 (Secure Architecture & Runtime), input validation discipline is universal because input boundaries (UI input, IPC, network responses, file system reads, deserialization) are assumed baseline."
   },
 
   "intrinsic_interpretation": {
@@ -114,7 +107,7 @@
     ],
     "forbidden_claims": [],
     "requires_external_certification": false,
-    "claim_boundary_notes": "Standard-level baseline (from manifest.json.standard_claim_policy) already covers OWASP-wide forbidden claims. No requirement-specific additions needed for MASVS-CODE-4. MASVS-CODE-4 is mapped to one Constitution v0.5 trace in mapping file v1.2: SEC-PILLAR-5-INPUT-VALIDATION (primary, same control by name and substance). The validation discipline is universal but the implementation surface is every input boundary in every file; reaper-input is the adversarial auditor that examines actual code paths for per-vector gaps (injection, deserialization, deep-link, IPC, network-input, file-system-input). Memory corruption vulnerabilities (mentioned in the MASVS-CODE category overview but not specifically in MASVS-CODE-4) are addressed by SEC-PILLAR-5-WX-MEMORY at Tier 4+. Tier routing handled downstream by Reaper Conclave matrix; the listed Reaper auditors consume this requirement when invoked for the bundle's tier and surface."
+    "claim_boundary_notes": "Standard-level baseline (from manifest.json.standard_claim_policy) already covers OWASP-wide forbidden claims. No requirement-specific additions needed for MASVS-CODE-4. MASVS-CODE-4 is mapped to one Constitution v0.5 trace in mapping file v1.2: SEC-PILLAR-5-INPUT-VALIDATION (primary, same control by name and substance). The validation discipline is universal but the implementation surface is every input boundary in every file; reaper-input is the adversarial auditor that examines actual code paths for per-vector gaps (injection, deserialization, deep-link, IPC, network-input, file-system-input). Memory corruption vulnerabilities (mentioned in the MASVS-CODE category overview but not specifically in MASVS-CODE-4) are addressed by SEC-PILLAR-5-WX-MEMORY. The listed Reaper auditors consume this requirement in their review of the bundle."
   },
 
   "intrinsic_mapping": {

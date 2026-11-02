@@ -32,20 +32,13 @@
   "source_integrity": {
     "source_artifact_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
     "transcription_input_sha256": "93d48b6bf8595ad097c82a16faa03229922cbc88e3dc7e8db4fbe45ffc247d21",
-    "requirement_file_sha256": "64a0e1b46c4020d29d3a8c5ff6c9e7ca5e2cabf4c219f172fcd0ecfaeb53bd05"
+    "requirement_file_sha256": "7a0ce1c5217ccb7991e33af8d720aa50437df14afae7f7197f1919955809c5ca"
   },
 
   "applicability": {
-    "tier_floor": 3,
     "conditions_logic": "all",
-    "conditions": [
-      {
-        "field": "security_manifest.app_tier",
-        "operator": ">=",
-        "value": 3
-      }
-    ],
-    "human_note": "Applies at Tier 3+ as a conservative corpus-level gate. Per Constitution Pillar 5 (Secure Architecture & Runtime), anti-static-analysis discipline activates at Tier 3+ where the app handles user authentication and private user-to-user content; the primary trace SEC-PILLAR-5-ANTI-STATIC-ANALYSIS is a Tier 3-5 control (new in Constitution v0.5). The blueprint schema does not currently declare a discrete obfuscation-required field as a top-level applicability filter, so security_manifest.app_tier >= 3 is used as a broad proxy. If a Tier 3+ app explicitly accepts the threat-model risk of plain-text binary inspection (e.g., an open-source app with documented exception), auditors may mark the requirement not-applicable during evidence review with documented justification in security_manifest. In practice every Intrinsic Code app at Tier 3+ requires anti-static-analysis protections because authentication and private-content apps must impede comprehension of detection logic, key derivation, and integrity-check implementations that defend RESILIENCE-1 and RESILIENCE-2."
+    "conditions": [],
+    "human_note": "Applies unconditionally (Constitution §9; Part II B6 for the banking lane). Per Constitution Pillar 5 (Secure Architecture & Runtime), anti-static-analysis discipline is realized through SEC-PILLAR-5-ANTI-STATIC-ANALYSIS, because apps must impede comprehension of detection logic, key derivation, and integrity-check implementations that defend RESILIENCE-1 and RESILIENCE-2."
   },
 
   "intrinsic_interpretation": {
@@ -119,7 +112,7 @@
     ],
     "forbidden_claims": [],
     "requires_external_certification": false,
-    "claim_boundary_notes": "Standard-level baseline (from manifest.json.standard_claim_policy) already covers OWASP-wide forbidden claims. No requirement-specific additions needed for MASVS-RESILIENCE-3. MASVS-RESILIENCE-3 is mapped to one Constitution v0.5 trace in mapping file v1.2: SEC-PILLAR-5-ANTI-STATIC-ANALYSIS (primary, direct). The trace was added in v0.5 specifically to provide a 1:1 mapping to RESILIENCE-3, so the mapping is direct rather than partial. Claims about anti-static-analysis security depend on the chosen mechanisms — obfuscation claims require non-trivial keep-rule scoping (no -dontobfuscate / overly-broad -keep); string-encryption claims require coverage of actually-sensitive constants (not trivial strings); symbol-stripping claims require post-build verification that the release artifact lacks readable symbol tables. Defense-in-depth: RESILIENCE-3 protections become substantially more valuable when combined with RESILIENCE-1 (platform integrity) and RESILIENCE-2 (anti-tampering) because they protect the detection logic those controls implement — RESILIENCE-3 without RESILIENCE-1/2 protects against general comprehension but provides no detection layer; RESILIENCE-1/2 without RESILIENCE-3 provides detection logic that attackers can trivially read and disable. Tier routing handled downstream by Reaper Conclave matrix; the listed Reaper auditors consume this requirement when invoked for the bundle's tier and surface."
+    "claim_boundary_notes": "Standard-level baseline (from manifest.json.standard_claim_policy) already covers OWASP-wide forbidden claims. No requirement-specific additions needed for MASVS-RESILIENCE-3. MASVS-RESILIENCE-3 is mapped to one Constitution v0.5 trace in mapping file v1.2: SEC-PILLAR-5-ANTI-STATIC-ANALYSIS (primary, direct). The trace was added in v0.5 specifically to provide a 1:1 mapping to RESILIENCE-3, so the mapping is direct rather than partial. Claims about anti-static-analysis security depend on the chosen mechanisms — obfuscation claims require non-trivial keep-rule scoping (no -dontobfuscate / overly-broad -keep); string-encryption claims require coverage of actually-sensitive constants (not trivial strings); symbol-stripping claims require post-build verification that the release artifact lacks readable symbol tables. Defense-in-depth: RESILIENCE-3 protections become substantially more valuable when combined with RESILIENCE-1 (platform integrity) and RESILIENCE-2 (anti-tampering) because they protect the detection logic those controls implement — RESILIENCE-3 without RESILIENCE-1/2 protects against general comprehension but provides no detection layer; RESILIENCE-1/2 without RESILIENCE-3 provides detection logic that attackers can trivially read and disable. The listed Reaper auditors consume this requirement in their review of the bundle."
   },
 
   "intrinsic_mapping": {
